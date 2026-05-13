@@ -857,12 +857,15 @@ async function callYuanfenju(name, year, month, day, hour, sex) {
 // ══════════════════════════════════════════
 async function callClaude(apiKey, paipanData) {
   const userMsg = BAZI_USER_TEMPLATE.replace('{{DATA}}', JSON.stringify({
-    四柱: paipanData.bazi_info || paipanData,
-    日主天干: paipanData.base_info?.day_tg || '',
-    五行: paipanData.bazi_info?.wuxing || '',
-    十神: paipanData.bazi_info?.tianganshishen || '',
-    大运: paipanData.dayun_info || '',
-    纳音: paipanData.bazi_info?.nayin || ''
+    四柱: paipanData.bazi_info?.bazi || [],
+    天干十神: paipanData.bazi_info?.tg_cg_god || [],
+    藏干: paipanData.bazi_info?.dz_cg || [],
+    长生: paipanData.bazi_info?.day_cs || [],
+    纳音: paipanData.bazi_info?.na_yin || [],
+    大运: paipanData.dayun_info?.big || [],
+    大运起始年: paipanData.dayun_info?.big_start_year || [],
+    空亡: paipanData.bazi_info?.kw || '',
+    起运: paipanData.base_info?.qiyun || ''
   }, null, 2));
 
   const resp = await fetch(CLAUDE_PROXY, {
@@ -913,7 +916,7 @@ function renderResult(name, pd, r) {
   const shishen = bi.tg_cg_god || [];   // 天干十神
   const dzCg = bi.dz_cg || [];          // 藏干
   const nayin = bi.na_yin || [];        // 纳音
-  const changsheng = bi.big || [];      // 长生十二宫
+  const changsheng = bi.day_cs || [];   // 长生十二宫
 
   const cols = ['year','month','day','hour'];
   cols.forEach((col, i) => {
@@ -923,7 +926,7 @@ function renderResult(name, pd, r) {
     document.getElementById('mp-'+col+'-tg').textContent = tg;
     document.getElementById('mp-'+col+'-dz').textContent = dz;
     document.getElementById('mp-'+col+'-sg').textContent = i===2 ? '日元' : (shishen[i] || '—');
-    document.getElementById('mp-'+col+'-cg').textContent = dzCg[i] || '—';
+    document.getElementById('mp-'+col+'-cg').textContent = (dzCg[i] || '—').replace(/\|/g, ' ');
     document.getElementById('mp-'+col+'-ny').textContent = nayin[i] || '—';
     document.getElementById('mp-'+col+'-cs').textContent = changsheng[i] || '—';
   });
@@ -931,23 +934,25 @@ function renderResult(name, pd, r) {
   // 元数据
   document.getElementById('mp-kw').textContent = bi.kw || '—';
   document.getElementById('mp-zhengge').textContent = base.zhengge || '—';
-  document.getElementById('mp-xiyong').textContent = pd.detail_info?.xiyongshen || (pd.xiyongshen) || '—';
+  document.getElementById('mp-xiyong').textContent = '—';
 
   // 大运
   const dayunGrid = document.getElementById('dayunGrid');
   dayunGrid.innerHTML = '';
   const currentYear = new Date().getFullYear();
-  for (let i = 0; i <= 9; i++) {
-    const yinfo = pd['years_info'+i];
-    if (!yinfo || !yinfo[0]) continue;
-    const startYear = parseInt(base.big_start_year_liu_nian?.split(',')[i]) || 0;
-    const gz = yinfo[0]?.year_char || '';
+  const dyInfo = pd.dayun_info || {};
+  const bigArr = dyInfo.big || [];
+  const bigStartYears = dyInfo.big_start_year || [];
+  for (let i = 0; i < bigArr.length && i < 8; i++) {
+    const gz = bigArr[i] || '';
+    const startYear = bigStartYears[i] || 0;
+    const endYear = (bigStartYears[i+1] || startYear+10) - 1;
+    const isCurrent = startYear && currentYear >= startYear && currentYear <= endYear;
     const item = document.createElement('div');
-    const isCurrent = startYear && currentYear >= startYear && currentYear < startYear+10;
     item.className = 'dayun-item' + (isCurrent ? ' dy-current' : '');
     const tg = gz[0] || '';
     const dz = gz[1] || '';
-    item.innerHTML = '<div class="dy-year">' + (startYear||'') + '年</div>' +
+    item.innerHTML = '<div class="dy-year">' + startYear + '年</div>' +
       '<div class="dy-gz">' + tg + '<br>' + dz + '</div>' +
       (isCurrent ? '<div class="dy-current-label">当前</div>' : '');
     dayunGrid.appendChild(item);
