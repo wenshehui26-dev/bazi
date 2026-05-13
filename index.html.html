@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>命局 · AI八字深解</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --gold:#C4922A;
+  --gold-light:#E2C06A;
+  --gold-pale:#F5E8C0;
+  --gold-dim:rgba(196,146,42,0.3);
+  --ink:#080810;
+  --card:#13131E;
+  --card2:#1A1A28;
+  --border:rgba(196,146,42,0.18);
+  --border2:rgba(196,146,42,0.4);
+  --text:#EAE4D8;
+  --muted:#6E6860;
+  --red:#C4503A;
+}
+
+html,body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'Noto Sans SC',sans-serif;
+  font-weight:300;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── BG ── */
+.bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -5%,rgba(160,110,20,0.1) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 30% at 90% 110%,rgba(100,70,10,0.07) 0%,transparent 60%);
+}
+.bg-grid{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(196,146,42,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(196,146,42,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+.wrap{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:0 0 5rem}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:2.5rem 1.5rem 1.5rem}
+.hero-symbol{
+  width:72px;height:72px;margin:0 auto 1.2rem;
+  border:1px solid rgba(196,146,42,0.3);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  animation:pulse 4s ease-in-out infinite;
+}
+.hero-symbol::before,.hero-symbol::after{
+  content:'';position:absolute;border-radius:50%;
+}
+.hero-symbol::before{inset:5px;border:0.5px solid rgba(196,146,42,0.15)}
+.hero-symbol::after{inset:12px;border:0.5px solid rgba(196,146,42,0.08)}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(196,146,42,0)}
+  50%{box-shadow:0 0 20px 4px rgba(196,146,42,0.1)}
+}
+.hero-char{font-family:'Noto Serif SC',serif;font-size:28px;color:var(--gold-light);font-weight:300}
+.hero-title{
+  font-family:'Noto Serif SC',serif;
+  font-size:2.1rem;font-weight:300;
+  color:var(--gold-light);
+  letter-spacing:0.18em;
+  margin-bottom:0.35rem;
+}
+.hero-sub{font-size:0.72rem;letter-spacing:0.25em;color:var(--muted);text-transform:uppercase}
+.hero-line{
+  display:flex;align-items:center;gap:0.75rem;
+  margin:1rem auto;max-width:260px;
+}
+.hero-line::before,.hero-line::after{content:'';flex:1;height:0.5px;background:var(--border)}
+.hero-line span{font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);white-space:nowrap}
+.hero-desc{font-size:0.85rem;line-height:1.9;color:rgba(234,228,216,0.6);max-width:280px;margin:0 auto}
+
+/* ── FORM CARD ── */
+.form-card{
+  margin:0 1.25rem 1.25rem;
+  background:var(--card);
+  border:0.5px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+}
+.form-section{font-size:0.68rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+.form-section::after{content:'';flex:1;height:0.5px;background:var(--border)}
+
+.field{margin-bottom:1rem}
+.field-label{font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem;letter-spacing:0.05em}
+.field-input{
+  width:100%;
+  background:rgba(255,255,255,0.03);
+  border:0.5px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  padding:0.7rem 0.9rem;
+  color:var(--text);
+  font-family:'Noto Sans SC',sans-serif;
+  font-size:0.88rem;font-weight:300;
+  outline:none;
+  transition:border-color 0.2s;
+  -webkit-appearance:none;
+}
+.field-input:focus{border-color:var(--border2)}
+.field-input::placeholder{color:var(--muted)}
+.field-input option{background:#1A1A28;color:var(--text)}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem}
+
+.gender-row{display:flex;gap:0.75rem}
+.gender-btn{
+  flex:1;padding:0.65rem;
+  background:rgba(255,255,255,0.03);
+  border:0.5px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  color:var(--muted);
+  font-size:0.85rem;cursor:pointer;
+  transition:all 0.2s;text-align:center;
+}
+.gender-btn.active{
+  background:rgba(196,146,42,0.1);
+  border-color:var(--border2);
+  color:var(--gold-light);
+}
+
+/* KEY INPUT */
+.key-card{
+  margin:0 1.25rem 1.25rem;
+  background:var(--card);
+  border:0.5px solid var(--border);
+  border-radius:14px;
+  padding:1.1rem 1.25rem;
+}
+.key-title{font-size:0.7rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:0.6rem}
+.key-row{display:flex;gap:0.5rem}
+.key-input{
+  flex:1;background:rgba(255,255,255,0.03);
+  border:0.5px solid rgba(255,255,255,0.1);
+  border-radius:7px;
+  padding:0.6rem 0.75rem;
+  color:var(--text);font-size:0.75rem;
+  font-family:'Noto Sans SC',sans-serif;
+  outline:none;
+}
+.key-input:focus{border-color:var(--border2)}
+.key-input::placeholder{color:var(--muted)}
+.btn-save{
+  padding:0.6rem 0.9rem;
+  background:rgba(196,146,42,0.12);
+  border:0.5px solid var(--border2);
+  border-radius:7px;
+  color:var(--gold-light);
+  font-size:0.75rem;cursor:pointer;white-space:nowrap;
+}
+.key-status{font-size:0.68rem;color:var(--muted);margin-top:0.4rem}
+.key-status.ok{color:#7CC48A}
+
+/* BTN */
+.btn-main{
+  width:calc(100% - 2.5rem);margin:0 1.25rem 1.25rem;
+  padding:1rem;
+  background:linear-gradient(135deg,rgba(196,146,42,0.2),rgba(196,146,42,0.08));
+  border:0.5px solid rgba(196,146,42,0.45);
+  border-radius:12px;
+  color:var(--gold-light);
+  font-family:'Noto Serif SC',serif;
+  font-size:1rem;font-weight:300;
+  letter-spacing:0.15em;cursor:pointer;
+  transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.btn-main:active{transform:scale(0.98)}
+.btn-main:disabled{opacity:0.3;cursor:not-allowed}
+
+/* LOADING */
+#loadingState{display:none;text-align:center;padding:3.5rem 1.5rem}
+.loading-bagua{
+  width:64px;height:64px;margin:0 auto 1.5rem;
+  border:1px solid rgba(196,146,42,0.2);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin 1.2s linear infinite;
+  display:flex;align-items:center;justify-content:center;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-inner{
+  width:48px;height:48px;
+  border:0.5px solid rgba(196,146,42,0.1);
+  border-bottom-color:rgba(196,146,42,0.4);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite reverse;
+}
+.loading-title{font-family:'Noto Serif SC',serif;font-size:1.1rem;color:var(--gold-light);margin-bottom:0.4rem}
+.loading-step{font-size:0.72rem;color:var(--muted);letter-spacing:0.1em}
+
+/* RESULT */
+#resultBlock{display:none;animation:fadeUp 0.6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* 四柱盘 */
+.sizhu-card{
+  margin:0 1.25rem 1rem;
+  background:var(--card);
+  border:0.5px solid var(--border2);
+  border-radius:16px;
+  overflow:hidden;
+}
+.sizhu-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.25rem 0.75rem;
+  border-bottom:0.5px solid var(--border);
+}
+.sizhu-title{font-family:'Noto Serif SC',serif;font-size:0.95rem;color:var(--gold-light);letter-spacing:0.1em}
+.sizhu-name{font-size:0.75rem;color:var(--muted)}
+.sizhu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.zhu{
+  padding:1rem 0.5rem;
+  text-align:center;
+  border-right:0.5px solid var(--border);
+  position:relative;
+}
+.zhu:last-child{border-right:none}
+.zhu-label{font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.75rem}
+.zhu-tg{
+  font-family:'Noto Serif SC',serif;
+  font-size:1.6rem;font-weight:400;
+  color:var(--gold-light);
+  margin-bottom:0.3rem;
+  line-height:1;
+}
+.zhu-dz{
+  font-family:'Noto Serif SC',serif;
+  font-size:1.6rem;font-weight:300;
+  color:var(--text);
+  line-height:1;
+}
+.zhu-wx{font-size:0.6rem;color:var(--muted);margin-top:0.4rem}
+.zhu-ss{
+  font-size:0.6rem;
+  color:var(--gold);
+  margin-top:0.25rem;
+  background:rgba(196,146,42,0.1);
+  border-radius:3px;
+  padding:0.1rem 0.3rem;
+  display:inline-block;
+}
+
+/* RESULT CARDS */
+.r-card{
+  margin:0 1.25rem 1rem;
+  background:var(--card);
+  border:0.5px solid var(--border);
+  border-radius:16px;
+  padding:1.25rem;
+}
+.r-label{
+  font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);
+  margin-bottom:0.9rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.r-label::after{content:'';flex:1;height:0.5px;background:var(--border)}
+
+.mingge-badge{
+  display:inline-block;
+  background:rgba(196,146,42,0.1);
+  border:0.5px solid var(--border2);
+  border-radius:20px;padding:0.25rem 0.9rem;
+  font-size:0.7rem;letter-spacing:0.12em;color:var(--gold);
+  margin-bottom:0.75rem;
+}
+.mingge-title{
+  font-family:'Noto Serif SC',serif;
+  font-size:1.35rem;color:var(--gold-light);
+  margin-bottom:0.6rem;letter-spacing:0.06em;
+}
+.r-text{font-size:0.85rem;line-height:1.9;color:var(--text)}
+
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin:0 1.25rem 1rem}
+.module-card{
+  background:var(--card);
+  border:0.5px solid var(--border);
+  border-radius:12px;
+  padding:1rem;
+}
+.module-icon{font-size:1.1rem;margin-bottom:0.5rem}
+.module-name{font-size:0.65rem;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.4rem}
+.module-text{font-size:0.8rem;line-height:1.8;color:var(--text)}
+
+/* PAYWALL */
+.paywall-card{
+  margin:0 1.25rem 1rem;
+  background:var(--card);
+  border:1px solid rgba(196,146,42,0.35);
+  border-radius:16px;
+  padding:1.5rem;
+  position:relative;overflow:hidden;
+}
+.paywall-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(196,146,42,0.05),transparent);
+  pointer-events:none;
+}
+.paywall-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+.paywall-title{font-family:'Noto Serif SC',serif;font-size:1rem;color:var(--gold-light)}
+.paywall-lock{font-size:0.8rem;color:var(--gold-dim)}
+.paywall-items{margin-bottom:1rem}
+.paywall-item{
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.8rem;color:var(--text);
+  padding:0.28rem 0;
+}
+.paywall-item::before{content:'✦';font-size:0.5rem;color:var(--gold);flex-shrink:0}
+.blur-preview{
+  filter:blur(5px);
+  background:rgba(255,255,255,0.02);
+  border-radius:8px;
+  padding:0.75rem;
+  font-size:0.82rem;line-height:1.85;
+  color:rgba(234,228,216,0.5);
+  margin-bottom:1.25rem;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.btn-unlock{
+  width:100%;padding:0.9rem;
+  background:linear-gradient(135deg,var(--gold),#8B6010);
+  border:none;border-radius:10px;
+  color:#0A0800;
+  font-family:'Noto Serif SC',serif;
+  font-size:0.95rem;font-weight:400;
+  letter-spacing:0.1em;cursor:pointer;
+  transition:opacity 0.2s;
+}
+.btn-unlock:active{opacity:0.85}
+.price-note{text-align:center;font-size:0.7rem;color:var(--muted);margin-top:0.5rem}
+
+/* QUOTE */
+.quote-card{
+  margin:0 1.25rem 1rem;
+  background:var(--card2);
+  border:0.5px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  text-align:center;
+}
+.quote-text{
+  font-family:'Noto Serif SC',serif;
+  font-size:1.08rem;font-style:italic;
+  color:var(--gold-light);line-height:1.9;
+  margin-bottom:0.5rem;
+}
+.quote-attr{font-size:0.68rem;color:var(--muted);letter-spacing:0.15em}
+
+/* SHARE */
+.share-card{
+  margin:0 1.25rem 1rem;
+  background:var(--card);
+  border:0.5px solid var(--border);
+  border-radius:16px;
+  padding:1.25rem;text-align:center;
+}
+.share-title{font-size:0.85rem;color:var(--text);margin-bottom:0.25rem}
+.share-hint{font-size:0.73rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
+.share-btns{display:flex;gap:0.75rem;margin-bottom:0.75rem}
+.btn-share{
+  flex:1;padding:0.65rem;
+  background:rgba(255,255,255,0.04);
+  border:0.5px solid rgba(255,255,255,0.1);
+  border-radius:9px;color:var(--text);
+  font-size:0.78rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:0.35rem;
+}
+.btn-again{
+  width:100%;padding:0.7rem;
+  background:transparent;
+  border:0.5px solid var(--border);
+  border-radius:9px;color:var(--gold);
+  font-size:0.82rem;cursor:pointer;
+}
+
+/* TRUST */
+.trust-row{
+  display:flex;justify-content:center;gap:2.5rem;
+  padding:1.25rem;
+}
+.trust-item{text-align:center}
+.trust-num{font-family:'Noto Serif SC',serif;font-size:1.2rem;color:var(--gold-light)}
+.trust-label{font-size:0.65rem;color:var(--muted)}
+
+/* FOOTER */
+.footer{text-align:center;padding:0.75rem 1.5rem 1rem;font-size:0.65rem;color:var(--muted);line-height:1.9}
+
+/* ERR */
+.err-box{
+  margin:0 1.25rem 1rem;
+  background:rgba(196,80,58,0.08);
+  border:0.5px solid rgba(196,80,58,0.3);
+  border-radius:10px;padding:0.9rem 1rem;
+  font-size:0.8rem;color:#F09080;line-height:1.7;
+  display:none;
+}
+
+/* ── 命盘表格 ── */
+.mingpan-wrap{overflow-x:auto;margin:0 -4px}
+.mingpan-table{width:100%;border-collapse:collapse;font-size:13px;text-align:center}
+.mingpan-table td{padding:8px 4px;border:1px solid var(--border);color:var(--text)}
+.mp-rowlabel{color:var(--gold);font-size:11px;white-space:nowrap;background:rgba(196,146,42,0.06);width:36px}
+.mp-col{color:var(--gold-light);font-size:12px;background:rgba(196,146,42,0.04)}
+.mp-day{background:rgba(196,146,42,0.1)!important}
+.mp-big{font-size:22px;font-family:'Noto Serif SC',serif;padding:10px 4px}
+.mp-gold{color:var(--gold)!important}
+.mp-tg-row td,.mp-dz-row td{background:rgba(0,0,0,0.2)}
+.mp-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;padding:8px 12px;background:rgba(196,146,42,0.05);border-radius:6px;font-size:12px;color:var(--muted)}
+.mp-meta b{color:var(--gold-light);margin-left:2px}
+
+/* ── 大运 ── */
+.dayun-wrap{margin-top:16px}
+.dayun-title{color:var(--gold);font-size:13px;letter-spacing:4px;text-align:center;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.dayun-grid{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.dayun-item{flex:0 0 60px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;font-size:11px}
+.dayun-item .dy-year{color:var(--muted);font-size:10px;margin-bottom:4px}
+.dayun-item .dy-gz{font-size:16px;font-family:'Noto Serif SC',serif;color:var(--text);line-height:1.4}
+.dayun-item.dy-current{border-color:var(--gold);background:rgba(196,146,42,0.08)}
+.dayun-item .dy-current-label{font-size:9px;color:var(--gold);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-symbol"><div class="hero-char">命</div></div>
+    <h1 class="hero-title">命 局</h1>
+    <p class="hero-sub">AI · 八字深解</p>
+    <div class="hero-line"><span>依据传统命理 · Claude 深度解读</span></div>
+    <p class="hero-desc">输入生辰信息，AI结合四柱八字理论<br>为你揭示命运格局与人生密码</p>
+  </div>
+
+  <!-- API KEY -->
+  <div class="key-card" id="keyCard">
+    <div class="key-title">⚙ 首次使用：填入 Anthropic API Key</div>
+    <div class="key-row">
+      <input class="key-input" id="keyInput" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
+      <button class="btn-save" onclick="saveKey()">保存</button>
+    </div>
+    <div class="key-status" id="keyStatus">Key 保存在本地，不会上传</div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-section">基本信息</div>
+
+    <div class="field">
+      <div class="field-label">姓名（可选）</div>
+      <input class="field-input" id="name" type="text" placeholder="请输入姓名">
+    </div>
+
+    <div class="field">
+      <div class="field-label">性别</div>
+      <div class="gender-row">
+        <div class="gender-btn active" id="btn-male" onclick="setGender(1)">♂ 男命</div>
+        <div class="gender-btn" id="btn-female" onclick="setGender(0)">♀ 女命</div>
+      </div>
+    </div>
+
+    <div class="form-section" style="margin-top:1rem">出生时间</div>
+
+    <div class="field">
+      <div class="field-label">出生日期</div>
+      <div class="field-row">
+        <input class="field-input" id="year" type="number" placeholder="年（如1990）" min="1900" max="2024">
+        <input class="field-input" id="month" type="number" placeholder="月（1-12）" min="1" max="12">
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <input class="field-input" id="day" type="number" placeholder="日（1-31）" min="1" max="31">
+        <select class="field-input" id="hour">
+          <option value="">时辰（可选）</option>
+          <option value="0">子时 (23-01时)</option>
+          <option value="2">丑时 (01-03时)</option>
+          <option value="4">寅时 (03-05时)</option>
+          <option value="6">卯时 (05-07时)</option>
+          <option value="8">辰时 (07-09时)</option>
+          <option value="10">巳时 (09-11时)</option>
+          <option value="12">午时 (11-13时)</option>
+          <option value="14">未时 (13-15时)</option>
+          <option value="16">申时 (15-17时)</option>
+          <option value="18">酉时 (17-19时)</option>
+          <option value="20">戌时 (19-21时)</option>
+          <option value="22">亥时 (21-23时)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="err-box" id="errBox"></div>
+
+  <button class="btn-main" id="btnStart" onclick="startReading()">
+    ✦ &nbsp;起卦排盘 · 深度解读
+  </button>
+
+  <!-- LOADING -->
+  <div id="loadingState">
+    <div class="loading-bagua"><div class="loading-inner"></div></div>
+    <div class="loading-title">正在推演命局…</div>
+    <div class="loading-step" id="loadStep">排布四柱八字</div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultBlock">
+
+    <!-- 四柱盘 -->
+    <div class="sizhu-card">
+      <div class="sizhu-header">
+        <div class="sizhu-title">四柱命盘</div>
+        <div class="sizhu-name" id="displayName">—</div>
+      </div>
+      <!-- 完整命盘表格 -->
+      <div class="mingpan-wrap">
+        <table class="mingpan-table">
+          <thead>
+            <tr>
+              <td class="mp-rowlabel"></td>
+              <td class="mp-col">年 柱</td>
+              <td class="mp-col">月 柱</td>
+              <td class="mp-col mp-day">日 柱</td>
+              <td class="mp-col">时 柱</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mp-rowlabel">十神</td>
+              <td id="mp-year-sg">—</td>
+              <td id="mp-month-sg">—</td>
+              <td id="mp-day-sg" class="mp-day">日元</td>
+              <td id="mp-hour-sg">—</td>
+            </tr>
+            <tr class="mp-tg-row">
+              <td class="mp-rowlabel">天干</td>
+              <td id="mp-year-tg" class="mp-big">—</td>
+              <td id="mp-month-tg" class="mp-big">—</td>
+              <td id="mp-day-tg" class="mp-big mp-day mp-gold">—</td>
+              <td id="mp-hour-tg" class="mp-big">—</td>
+            </tr>
+            <tr class="mp-dz-row">
+              <td class="mp-rowlabel">地支</td>
+              <td id="mp-year-dz" class="mp-big">—</td>
+              <td id="mp-month-dz" class="mp-big">—</td>
+              <td id="mp-day-dz" class="mp-big mp-day">—</td>
+              <td id="mp-hour-dz" class="mp-big">—</td>
+            </tr>
+            <tr>
+              <td class="mp-rowlabel">藏干</td>
+              <td id="mp-year-cg">—</td>
+              <td id="mp-month-cg">—</td>
+              <td id="mp-day-cg" class="mp-day">—</td>
+              <td id="mp-hour-cg">—</td>
+            </tr>
+            <tr>
+              <td class="mp-rowlabel">纳音</td>
+              <td id="mp-year-ny">—</td>
+              <td id="mp-month-ny">—</td>
+              <td id="mp-day-ny" class="mp-day">—</td>
+              <td id="mp-hour-ny">—</td>
+            </tr>
+            <tr>
+              <td class="mp-rowlabel">长生</td>
+              <td id="mp-year-cs">—</td>
+              <td id="mp-month-cs">—</td>
+              <td id="mp-day-cs" class="mp-day">—</td>
+              <td id="mp-hour-cs">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mp-meta">
+          <span>空亡：<b id="mp-kw">—</b></span>
+          <span>正格：<b id="mp-zhengge">—</b></span>
+          <span>喜用神：<b id="mp-xiyong">—</b></span>
+        </div>
+      </div>
+
+      <!-- 大运表格 -->
+      <div class="dayun-wrap">
+        <div class="dayun-title">大 运</div>
+        <div class="dayun-grid" id="dayunGrid"></div>
+      </div>
+    </div>
+
+    <!-- 命格 -->
+    <div class="r-card" id="minggeCard">
+      <div class="r-label">命格解读</div>
+      <div class="mingge-badge" id="minggeType">—</div>
+      <div class="mingge-title" id="minggeTitle" style="display:none"></div>
+      <div class="r-text" id="minggeDesc">—</div>
+    </div>
+
+    <!-- 日主 -->
+    <div class="r-card">
+      <div class="r-label">日主深度解读</div>
+      <div class="r-text" id="rizhuText">—</div>
+    </div>
+
+    <!-- 四格 -->
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-icon">⚖</div>
+        <div class="module-name">五行格局</div>
+        <div class="module-text" id="wuxingText">—</div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">🏛</div>
+        <div class="module-name">事业方向</div>
+        <div class="module-text" id="careerText">—</div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">💰</div>
+        <div class="module-name">财运分析</div>
+        <div class="module-text" id="wealthText">—</div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">♡</div>
+        <div class="module-name">感情婚姻</div>
+        <div class="module-text" id="relationText">—</div>
+      </div>
+    </div>
+
+    <!-- 大运 -->
+    <div class="r-card">
+      <div class="r-label">大运提示</div>
+      <div class="r-text" id="dayunText">—</div>
+    </div>
+
+    <!-- 付费墙 -->
+    <div class="paywall-card">
+      <div class="paywall-top">
+        <div class="paywall-title">🔒 完整命局深批</div>
+        <div class="paywall-lock">解锁查看</div>
+      </div>
+      <div class="paywall-items">
+        <div class="paywall-item">流年详批 · 今年每月关键时机</div>
+        <div class="paywall-item">贵人方位 · 你的专属助运方向</div>
+        <div class="paywall-item">命中转折点 · 具体年份与信号</div>
+        <div class="paywall-item">感情细节 · 姻缘时机与对象特征</div>
+        <div class="paywall-item">财富密码 · 最适合你的赚钱方式</div>
+      </div>
+      <div class="blur-preview" id="lockedPreview">
+        此命格隐藏着一个极为罕见的转折信号…今年某月前后将有重大变化…贵人出现在意想不到的方向…
+      </div>
+      <button class="btn-unlock" onclick="handleUnlock()">解锁完整深批 · ¥19.9</button>
+      <div class="price-note">一次性付费 · 永久查看 · 支持微信 / 支付宝</div>
+    </div>
+
+    <!-- 箴言 -->
+    <div class="quote-card">
+      <div class="quote-text" id="adviceText">"命由己造，相由心生"</div>
+      <div class="quote-attr">— 大师箴言</div>
+    </div>
+
+    <!-- 分享 -->
+    <div class="share-card">
+      <div class="share-title">你的命局解读出来了 ✦</div>
+      <div class="share-hint">发给朋友一起测，看看你们的命格有何不同</div>
+      <div class="share-btns">
+        <button class="btn-share" onclick="handleShare()">📤 分享给朋友</button>
+        <button class="btn-share" onclick="handleCopy()">🔗 复制链接</button>
+      </div>
+      <button class="btn-again" onclick="resetAll()">↩ 重新测算</button>
+    </div>
+
+  </div>
+
+  <!-- TRUST -->
+  <div class="trust-row">
+    <div class="trust-item"><div class="trust-num">98%</div><div class="trust-label">用户认可</div></div>
+    <div class="trust-item"><div class="trust-num">5万+</div><div class="trust-label">已测人数</div></div>
+    <div class="trust-item"><div class="trust-num">AI驱动</div><div class="trust-label">Claude 大模型</div></div>
+  </div>
+
+  <div class="footer">
+    命局 · AI八字深解 &nbsp;|&nbsp; Powered by Claude<br>
+    解读结果依据传统命理学，仅供娱乐参考，请理性看待
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// 配置
+// ══════════════════════════════════════════
+const YUANFENJU_KEY = 'SMrRNpuFo4ugVIKBNFSv3E8MF'; // 缘份居 API Key
+const CLAUDE_PROXY  = 'https://api.yizhige.top/v1/messages';
+
+// ══════════════════════════════════════════
+// 八字解读系统提示词
+// ══════════════════════════════════════════
+const BAZI_SYSTEM_PROMPT = `你是一位融合中国传统命理学与现代心理学的八字大师，精通《渊海子平》《三命通会》《五行大义》《滴天髓》《穷通宝鉴》等典籍。解读风格神秘有温度，言辞精准，善于说出让人"被看穿"的感觉。
+
+【十天干核心性格】
+甲木：领导气质、追求第一、刚健直爽、固执高傲、光明磊落
+乙木：感受力极强、温柔善良、优柔寡断、多情灵活、艺术天赋
+丙火：自信满满、天生舞台感、外向热情、急躁好表现、持久性差
+丁火：明察秋毫、外柔内刚、思维深邃、神秘内敛、善洞察人心
+戊土：与财富有缘、包容性强、忠厚慢性子、老成沉稳
+己土：善于策划、城府深、表面温顺内心有主见、幕后高手
+庚金：说一不二、执行力强、好战粗犷、嫉恶如仇、魄力十足
+辛金：追求卓越、不甘平庸、好面子、外柔内刚、善发现问题
+壬水：智慧超群、随机应变、圆滑变通、风流任性、需要接地气
+癸水：直觉极强、幕后运筹、感情细腻、阴柔沉静、善于策划
+
+【十神含义】
+比肩：自我独立竞争 | 劫财：争夺破财桃花 | 食神：才华享受创造 | 伤官：叛逆创新情绪化
+正财：稳定收入务实 | 偏财：意外之财广人缘 | 正官：名誉规则责任 | 七杀：压力挑战执行力
+正印：贵人学习保护 | 偏印：独立思考专业技能
+
+【解读规则】
+1. 日主天干决定核心性格，日支藏干决定内心世界
+2. 月令是最重要的旺衰判断依据
+3. 每条解读必须引用具体天干地支作为依据
+4. 性格解读要说出表面与内心的矛盾，让用户觉得被看穿
+5. 语气神秘有权威感，但不要夸张`;
+
+const BAZI_USER_TEMPLATE = `请根据以下八字排盘数据进行深度解读。
+
+【排盘数据】
+{{DATA}}
+
+【输出格式】直接输出JSON，不要markdown代码块：
+{"mingge":"命格类型6-10字","mingge_desc":"命格总述80字内","rizhu_analysis":"日主深度解读100字内必须说出表面与内心矛盾","wuxing_balance":"五行强弱60字内","career":"事业方向80字内给出2-3个具体方向","wealth":"财运分析60字内","relationship":"感情婚姻60字内说出让人共鸣的感情特质","dayun_hint":"大运提示60字内提及具体时间节点","locked_preview":"隐藏内容预览60字内神秘且有吸引力暗示关键转折年份或今年特殊信号","advice":"大师箴言20字内有力量感"}`;
+
+// ══════════════════════════════════════════
+// 状态
+// ══════════════════════════════════════════
+let sex = 1;
+
+window.onload = () => {
+  const saved = localStorage.getItem('claudeApiKey');
+  if (saved) {
+    document.getElementById('keyInput').value = saved;
+    document.getElementById('keyStatus').textContent = '✓ Key 已保存，可直接使用';
+    document.getElementById('keyStatus').className = 'key-status ok';
+  }
+};
+
+function saveKey() {
+  const val = document.getElementById('keyInput').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    document.getElementById('keyStatus').textContent = '⚠ Key 格式不对，应以 sk-ant- 开头';
+    return;
+  }
+  localStorage.setItem('claudeApiKey', val);
+  document.getElementById('keyStatus').textContent = '✓ Key 已保存';
+  document.getElementById('keyStatus').className = 'key-status ok';
+}
+
+function getKey() {
+  return localStorage.getItem('claudeApiKey') || document.getElementById('keyInput').value.trim();
+}
+
+function setGender(v) {
+  sex = v;
+  document.getElementById('btn-male').className  = 'gender-btn' + (v===1?' active':'');
+  document.getElementById('btn-female').className = 'gender-btn' + (v===0?' active':'');
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display='none', 6000);
+}
+
+// ══════════════════════════════════════════
+// 主流程
+// ══════════════════════════════════════════
+async function startReading() {
+  const key   = getKey();
+  const name  = document.getElementById('name').value.trim() || '命主';
+  const year  = document.getElementById('year').value;
+  const month = document.getElementById('month').value;
+  const day   = document.getElementById('day').value;
+  const hour  = document.getElementById('hour').value;
+
+  if (!key || !key.startsWith('sk-ant-')) { showErr('请先填写并保存 Anthropic API Key'); return; }
+  if (!year || !month || !day) { showErr('请填写完整的出生年月日'); return; }
+
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('resultBlock').style.display = 'none';
+  document.getElementById('errBox').style.display = 'none';
+
+  const steps = ['排布四柱八字…','推算大运流年…','分析五行格局…','深度解读命局…'];
+  let si = 0;
+  const t = setInterval(() => {
+    si = (si+1) % steps.length;
+    document.getElementById('loadStep').textContent = steps[si];
+  }, 1500);
+
+  try {
+    // Step 1: 缘份居排盘
+    const paipanData = await callYuanfenju(name, year, month, day, hour || 12, sex);
+
+    // Step 2: Claude 解读
+    const reading = await callClaude(key, paipanData);
+
+    clearInterval(t);
+    renderResult(name, paipanData, reading);
+
+  } catch(e) {
+    clearInterval(t);
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('btnStart').style.display = 'flex';
+    showErr('解读失败：' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════
+// 缘份居 API
+// ══════════════════════════════════════════
+async function callYuanfenju(name, year, month, day, hour, sex) {
+  const resp = await fetch('https://api.yizhige.top/yuanfenju', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      api_key: YUANFENJU_KEY,
+      name: name,
+      sex: sex,
+      type: 1,
+      year: year,
+      month: month,
+      day: day,
+      hours: hour,
+      minute: 0
+    })
+  });
+  if (!resp.ok) throw new Error('排盘接口请求失败');
+  const json = await resp.json();
+  if (json.errcode !== 0) throw new Error('排盘失败：' + (json.errmsg || '未知错误'));
+  return json.data;
+}
+
+// ══════════════════════════════════════════
+// Claude API（走 Cloudflare 代理）
+// ══════════════════════════════════════════
+async function callClaude(apiKey, paipanData) {
+  const userMsg = BAZI_USER_TEMPLATE.replace('{{DATA}}', JSON.stringify({
+    四柱: paipanData.bazi_info || paipanData,
+    日主天干: paipanData.base_info?.day_tg || '',
+    五行: paipanData.bazi_info?.wuxing || '',
+    十神: paipanData.bazi_info?.tianganshishen || '',
+    大运: paipanData.dayun_info || '',
+    纳音: paipanData.bazi_info?.nayin || ''
+  }, null, 2));
+
+  const resp = await fetch(CLAUDE_PROXY, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      system: BAZI_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    if (resp.status === 401) throw new Error('API Key 无效或已过期');
+    throw new Error(err.error?.message || `请求失败 (${resp.status})`);
+  }
+
+  const data = await resp.json();
+  const raw = data.content?.find(b => b.type==='text')?.text || '';
+  try {
+    return JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch {
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+    throw new Error('解析失败，请重试');
+  }
+}
+
+// ══════════════════════════════════════════
+// 渲染结果
+// ══════════════════════════════════════════
+function renderResult(name, pd, r) {
+  document.getElementById('loadingState').style.display = 'none';
+
+  // 显示名字
+  document.getElementById('displayName').textContent = name ? name + ' 命盘' : '命盘';
+
+  // 数据提取
+  const bi = pd.bazi_info || {};
+  const base = pd.base_info || {};
+  const bazi = bi.bazi || [];           // ["壬戌","丙寅","己亥","辛未"]
+  const shishen = bi.tg_cg_god || [];   // 天干十神
+  const dzCg = bi.dz_cg || [];          // 藏干
+  const nayin = bi.na_yin || [];        // 纳音
+  const changsheng = bi.big || [];      // 长生十二宫
+
+  const cols = ['year','month','day','hour'];
+  cols.forEach((col, i) => {
+    const gz = bazi[i] || '';
+    const tg = gz[0] || '—';
+    const dz = gz[1] || '—';
+    document.getElementById('mp-'+col+'-tg').textContent = tg;
+    document.getElementById('mp-'+col+'-dz').textContent = dz;
+    document.getElementById('mp-'+col+'-sg').textContent = i===2 ? '日元' : (shishen[i] || '—');
+    document.getElementById('mp-'+col+'-cg').textContent = dzCg[i] || '—';
+    document.getElementById('mp-'+col+'-ny').textContent = nayin[i] || '—';
+    document.getElementById('mp-'+col+'-cs').textContent = changsheng[i] || '—';
+  });
+
+  // 元数据
+  document.getElementById('mp-kw').textContent = bi.kw || '—';
+  document.getElementById('mp-zhengge').textContent = base.zhengge || '—';
+  document.getElementById('mp-xiyong').textContent = pd.detail_info?.xiyongshen || (pd.xiyongshen) || '—';
+
+  // 大运
+  const dayunGrid = document.getElementById('dayunGrid');
+  dayunGrid.innerHTML = '';
+  const currentYear = new Date().getFullYear();
+  for (let i = 0; i <= 9; i++) {
+    const yinfo = pd['years_info'+i];
+    if (!yinfo || !yinfo[0]) continue;
+    const startYear = parseInt(base.big_start_year_liu_nian?.split(',')[i]) || 0;
+    const gz = yinfo[0]?.year_char || '';
+    const item = document.createElement('div');
+    const isCurrent = startYear && currentYear >= startYear && currentYear < startYear+10;
+    item.className = 'dayun-item' + (isCurrent ? ' dy-current' : '');
+    const tg = gz[0] || '';
+    const dz = gz[1] || '';
+    item.innerHTML = '<div class="dy-year">' + (startYear||'') + '年</div>' +
+      '<div class="dy-gz">' + tg + '<br>' + dz + '</div>' +
+      (isCurrent ? '<div class="dy-current-label">当前</div>' : '');
+    dayunGrid.appendChild(item);
+  }
+
+  // 命格
+  document.getElementById('minggeType').textContent = r.mingge || '—';
+  document.getElementById('minggeDesc').textContent = r.mingge_desc || '—';
+
+  // 日主
+  document.getElementById('rizhuText').textContent = r.rizhu_analysis || '—';
+
+  // 四格
+  document.getElementById('wuxingText').textContent  = r.wuxing_balance || '—';
+  document.getElementById('careerText').textContent  = r.career || '—';
+  document.getElementById('wealthText').textContent  = r.wealth || '—';
+  document.getElementById('relationText').textContent = r.relationship || '—';
+
+  // 大运
+  document.getElementById('dayunText').textContent = r.dayun_hint || '—';
+
+  // 付费预览
+  document.getElementById('lockedPreview').textContent = r.locked_preview || '此命格隐藏着重要信号，解锁查看完整深批…';
+
+  // 箴言
+  document.getElementById('adviceText').textContent = `"${r.advice || '命由己造，相由心生'}"`;
+
+  document.getElementById('resultBlock').style.display = 'block';
+  document.getElementById('resultBlock').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ══════════════════════════════════════════
+// 工具函数
+// ══════════════════════════════════════════
+function handleUnlock() {
+  alert('支付功能开发中\n接入微信支付 / 支付宝后上线');
+}
+
+function handleShare() {
+  const text = `我刚测了 AI 八字深解，命格解读太准了！\n你也来测一下 👉 ${location.href}`;
+  if (navigator.share) {
+    navigator.share({ title:'命局·AI八字深解', text, url:location.href }).catch(()=>{});
+  } else { handleCopy(); alert('链接已复制，去粘贴分享吧！'); }
+}
+
+function handleCopy() {
+  navigator.clipboard?.writeText(location.href).then(()=>alert('链接已复制 ✓')).catch(()=>{
+    const el = document.createElement('textarea');
+    el.value = location.href;
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    alert('链接已复制 ✓');
+  });
+}
+
+function resetAll() {
+  document.getElementById('resultBlock').style.display = 'none';
+  document.getElementById('btnStart').style.display = 'flex';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+</script>
+</body>
+</html>
