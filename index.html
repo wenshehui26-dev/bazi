@@ -437,6 +437,17 @@ html,body{
 .dayun-item .dy-gz{font-size:16px;font-family:'Noto Serif SC',serif;color:var(--text);line-height:1.4}
 .dayun-item.dy-current{border-color:var(--gold);background:rgba(196,146,42,0.08)}
 .dayun-item .dy-current-label{font-size:9px;color:var(--gold);margin-top:2px}
+
+/* ── 付费弹窗 ── */
+.pay-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center}
+.pay-overlay.show{display:flex}
+.pay-box{background:#1a1a2e;border:1px solid #c4922a;border-radius:16px;padding:24px 20px;text-align:center;max-width:320px;width:90%;position:relative}
+.pay-close{position:absolute;top:12px;right:16px;color:#888;font-size:20px;cursor:pointer}
+.pay-title{color:#c4922a;font-size:18px;font-weight:600;margin-bottom:4px}
+.pay-sub{color:#888;font-size:12px;margin-bottom:16px}
+.pay-qr{width:200px;height:200px;border-radius:8px;margin:0 auto 12px}
+.pay-tip{color:#aaa;font-size:12px;line-height:1.6}
+.pay-tip b{color:#c4922a}
 </style>
 </head>
 <body>
@@ -453,9 +464,6 @@ html,body{
     <p class="hero-desc">输入生辰信息，AI结合四柱八字理论<br>为你揭示命运格局与人生密码</p>
   </div>
 
-  <!-- API KEY -->
-  <div class="key-card" id="keyCard">
-    <div class="key-title">⚙ 首次使用：填入 Anthropic API Key</div>
     <div class="key-row">
       <input class="key-input" id="keyInput" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
       <button class="btn-save" onclick="saveKey()">保存</button>
@@ -800,7 +808,21 @@ function showErr(msg) {
 // ══════════════════════════════════════════
 // 主流程
 // ══════════════════════════════════════════
+
+// ── 免费次数控制 ──
+const FREE_LIMIT = 3;
+const STORAGE_KEY = 'yizhige_uses';
+
+function getUses() { return parseInt(localStorage.getItem(STORAGE_KEY) || '0'); }
+function addUse() { localStorage.setItem(STORAGE_KEY, getUses() + 1); }
+function hasQuota() { return getUses() < FREE_LIMIT; }
+
+function closePayment() {
+  document.getElementById('payOverlay').classList.remove('show');
+}
+
 async function startReading() {
+  if (!hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
@@ -808,7 +830,7 @@ async function startReading() {
   const day   = document.getElementById('day').value;
   const hour  = document.getElementById('hour').value;
 
-  if (!key || !key.startsWith('sk-ant-')) { showErr('请先填写并保存 Anthropic API Key'); return; }
+  
   if (!year || !month || !day) { showErr('请填写完整的出生年月日'); return; }
 
   document.getElementById('btnStart').style.display = 'none';
@@ -831,7 +853,7 @@ async function startReading() {
     const reading = await callClaude(key, paipanData);
 
     clearInterval(t);
-    renderResult(name, paipanData, reading);
+    addUse(); renderResult(name, paipanData, reading);
 
   } catch(e) {
     clearInterval(t);
