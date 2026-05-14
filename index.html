@@ -424,6 +424,9 @@ html,body{
 .mp-tg-row td,.mp-dz-row td{background:rgba(0,0,0,0.2)}
 .mp-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;padding:8px 12px;background:rgba(196,146,42,0.05);border-radius:6px;font-size:12px;color:var(--muted)}
 .mp-meta b{color:var(--gold-light);margin-left:2px}
+.mp-shensha{margin-top:8px;padding:8px 12px;background:rgba(196,146,42,0.05);border-radius:6px;font-size:11px}
+.mp-shensha-title{color:var(--gold);font-size:11px;margin-bottom:4px;letter-spacing:1px}
+#mp-shensha-content{color:var(--muted);line-height:1.8}
 
 /* ── 大运 ── */
 .dayun-wrap{margin-top:16px}
@@ -573,6 +576,13 @@ html,body{
               <td id="mp-hour-cg">—</td>
             </tr>
             <tr>
+              <td class="mp-rowlabel">支神</td>
+              <td id="mp-year-zs" style="font-size:11px;line-height:1.5">—</td>
+              <td id="mp-month-zs" style="font-size:11px;line-height:1.5">—</td>
+              <td id="mp-day-zs" class="mp-day" style="font-size:11px;line-height:1.5">—</td>
+              <td id="mp-hour-zs" style="font-size:11px;line-height:1.5">—</td>
+            </tr>
+            <tr>
               <td class="mp-rowlabel">纳音</td>
               <td id="mp-year-ny">—</td>
               <td id="mp-month-ny">—</td>
@@ -589,9 +599,13 @@ html,body{
           </tbody>
         </table>
         <div class="mp-meta">
-          <span>空亡：<b id="mp-kw">—</b></span>
           <span>正格：<b id="mp-zhengge">—</b></span>
-          <span>喜用神：<b id="mp-xiyong">—</b></span>
+          <span>起运：<b id="mp-qiyun">—</b></span>
+          <span>空亡：<b id="mp-kw">—</b></span>
+        </div>
+        <div class="mp-shensha" id="mp-shensha-wrap">
+          <div class="mp-shensha-title">神煞</div>
+          <div id="mp-shensha-content">—</div>
         </div>
       </div>
 
@@ -918,6 +932,7 @@ function renderResult(name, pd, r) {
   const nayin = bi.na_yin || [];        // 纳音
   const changsheng = bi.day_cs || [];   // 长生十二宫
 
+  const dzCgGod = bi.dz_cg_god || [];   // 支神
   const cols = ['year','month','day','hour'];
   cols.forEach((col, i) => {
     const gz = bazi[i] || '';
@@ -927,6 +942,11 @@ function renderResult(name, pd, r) {
     document.getElementById('mp-'+col+'-dz').textContent = dz;
     document.getElementById('mp-'+col+'-sg').textContent = i===2 ? '日元' : (shishen[i] || '—');
     document.getElementById('mp-'+col+'-cg').textContent = (dzCg[i] || '—').replace(/\|/g, ' ');
+    // 支神：每两个一组换行
+    const zsRaw = (dzCgGod[i] || '').split('|');
+    const zsLines = [];
+    for(let j=0;j<zsRaw.length;j+=2) zsLines.push(zsRaw.slice(j,j+2).join(''));
+    document.getElementById('mp-'+col+'-zs').innerHTML = zsLines.join('<br>') || '—';
     document.getElementById('mp-'+col+'-ny').textContent = nayin[i] || '—';
     document.getElementById('mp-'+col+'-cs').textContent = changsheng[i] || '—';
   });
@@ -934,7 +954,13 @@ function renderResult(name, pd, r) {
   // 元数据
   document.getElementById('mp-kw').textContent = bi.kw || '—';
   document.getElementById('mp-zhengge').textContent = base.zhengge || '—';
-  document.getElementById('mp-xiyong').textContent = '—';
+  document.getElementById('mp-qiyun').textContent = base.qiyun || '—';
+
+  // 神煞
+  const jishen = pd.start_info?.jishen || [];
+  const colNames = ['年柱','月柱','日柱','时柱'];
+  const ssHtml = jishen.map((s,i) => s ? '<span style="color:var(--gold-light)">' + colNames[i] + '：</span>' + s : '').filter(Boolean).join('<br>');
+  document.getElementById('mp-shensha-content').innerHTML = ssHtml || '—';
 
   // 大运
   const dayunGrid = document.getElementById('dayunGrid');
