@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -784,14 +784,25 @@ function showErr(msg) {
 // ══════════════════════════════════════════
 
 // 免费次数
-const _LIMIT = 3;
-const _KEY = 'yzg_uses';
-function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
-function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
-function _hasQuota(){ return _getUses() < _LIMIT; }
+function getUserId() {
+  let id = localStorage.getItem('yzg_uid');
+  if (!id) {
+    id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('yzg_uid', id);
+  }
+  return id;
+}
 
 async function startReading() {
-  if (!_hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
+  const _useResp = await fetch('https://api.yizhige.top/use-bazi', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: getUserId() })
+  }).catch(() => null);
+  if (_useResp && _useResp.status === 403) {
+    document.getElementById('payOverlay').classList.add('show');
+    return;
+  }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
@@ -821,7 +832,7 @@ async function startReading() {
     const reading = await callClaude(key, paipanData);
 
     clearInterval(t);
-    _addUse(); renderResult(name, paipanData, reading);
+    renderResult(name, paipanData, reading);
 
   } catch(e) {
     clearInterval(t);
