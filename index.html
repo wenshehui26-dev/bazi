@@ -1083,20 +1083,30 @@ async function generateDeepContent() {
     });
   }
   try {
-    const resp = await fetch('https://api.yizhige.top/use-bazi-deep', {
+    // 第一步：扣除积分
+    const creditResp = await fetch('https://api.yizhige.top/use-bazi-deep', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ userId, paipanData: _pd, basicResult: _rd })
+      body: JSON.stringify({ userId })
     });
-    const data = await resp.json();
-    if (data.error) { alert('错误: ' + data.error); return; }
-    const sections = ['dc1','dc2','dc3','dc4','dc5'];
+    const creditData = await creditResp.json();
+    if (creditData.error) { alert('错误: ' + creditData.error); return; }
+    // 第二步：调用Claude生成深度内容
+    const prompt = '你是专业八字命理师，请基于以下排盘数据和基础解读，生成深度批命报告。\n\n排盘数据：' + JSON.stringify(_pd) + '\n\n基础解读：' + JSON.stringify(_rd) + '\n\n请分5个部分输出，每部分300-500字，严格用以下XML格式：\n<dc1>格局与日主强弱分析</dc1>\n<dc2>财官印食神详解</dc2>\n<dc3>婚恋与六亲缘分</dc3>\n<dc4>事业财运走势</dc4>\n<dc5>大运流年具体提示</dc5>';
+    const aiResp = await fetch('https://api.yizhige.top/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
+    });
+    const aiData = await aiResp.json();
+    const text = aiData.content?.[0]?.text || '';
     const titles = ['格局与日主强弱','财官印食分析','婚恋与六亲','事业与财运走势','大运流年提示'];
-    sections.forEach((id, i) => {
+    ['dc1','dc2','dc3','dc4','dc5'].forEach((id, i) => {
       const el = document.getElementById(id);
-      if (el && data[id]) {
-        el.innerHTML = '<h3 style="color:#8b4513;margin-bottom:10px;">🔮 ' + titles[i] + '</h3><p style="line-height:1.8;">' + data[id] + '</p>';
-      }
+      if (!el) return;
+      const match = text.match(new RegExp('<' + id + '>([\\s\\S]*?)<\\/' + id + '>'));
+      const content = match ? match[1].trim() : '解读生成中，请稍候...';
+      el.innerHTML = '<h3 style="color:#8b4513;margin-bottom:10px;">🔮 ' + titles[i] + '</h3><p style="line-height:1.8;">' + content + '</p>';
     });
   } catch(e) {
     alert('深度解读请求失败，请重试');
