@@ -1062,7 +1062,7 @@ async function handleDeepUnlock() {
     } else {
       const el = document.getElementById('payUserId');
       if (el) el.textContent = userId;
-      const modal = document.getElementById('payModal') || document.getElementById('pay-modal');
+      const modal = document.getElementById('payOverlay') || document.getElementById('payModal') || document.getElementById('pay-modal');
       if (modal) modal.style.display = 'flex';
     }
   } catch(e) {
