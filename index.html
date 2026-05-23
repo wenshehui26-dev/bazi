@@ -1072,6 +1072,7 @@ async function handleDeepUnlock() {
 
 // ── 生成深度批命内容
 async function generateDeepContent() {
+  const userId = getUserId();
   if (!_pd || !_rd) { alert('请先完成基础解读'); return; }
   const card = document.getElementById('dcCard');
   if (card) {
