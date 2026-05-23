@@ -1052,6 +1052,7 @@ function resetAll() {
 
 // ── 深度批命解锁入口
 async function handleDeepUnlock() {
+  const userId = getUserId();
   if (!userId) { alert('请先提交八字进行基础解读'); return; }
   try {
     const r = await fetch('https://api.yizhige.top/user-info?userId=' + encodeURIComponent(userId));
