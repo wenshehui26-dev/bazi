@@ -676,7 +676,15 @@ html,body{
       <div class="blur-preview" id="lockedPreview">
         此命格隐藏着一个极为罕见的转折信号…今年某月前后将有重大变化…贵人出现在意想不到的方向…
       </div>
-      <button class="btn-unlock" onclick="handleUnlock()">解锁完整深批 · ¥19.9</button>
+      <button class="btn-unlock" onclick="handleDeepUnlock()">解锁完整深批 · ¥19.9</button>
+<!-- 深度批命卡片 -->
+<div id="dcCard" style="display:none;margin-top:20px;">
+  <div class="section-card" id="dc1"></div>
+  <div class="section-card" id="dc2"></div>
+  <div class="section-card" id="dc3"></div>
+  <div class="section-card" id="dc4"></div>
+  <div class="section-card" id="dc5"></div>
+</div>
       <div class="price-note">一次性付费 · 永久查看 · 支持微信 / 支付宝</div>
     </div>
 
@@ -784,6 +792,7 @@ function showErr(msg) {
 // ══════════════════════════════════════════
 
 // 免费次数
+let _pd=null,_rd=null;
 function getUserId() {
   let id = localStorage.getItem('yzg_uid');
   if (!id) {
@@ -918,6 +927,7 @@ async function callClaude(apiKey, paipanData) {
 // 渲染结果
 // ══════════════════════════════════════════
 function renderResult(name, pd, r) {
+  _pd=pd; _rd=r;
   document.getElementById('loadingState').style.display = 'none';
 
   // 显示名字
@@ -1039,6 +1049,58 @@ function resetAll() {
   document.getElementById('btnStart').style.display = 'flex';
   window.scrollTo({ top:0, behavior:'smooth' });
 }
+
+// ── 深度批命解锁入口
+async function handleDeepUnlock() {
+  if (!userId) { alert('请先提交八字进行基础解读'); return; }
+  try {
+    const r = await fetch('https://api.yizhige.top/user-info?userId=' + encodeURIComponent(userId));
+    const d = await r.json();
+    if (d.bazi_credits && d.bazi_credits > 0) {
+      await generateDeepContent();
+    } else {
+      const el = document.getElementById('payUserId');
+      if (el) el.textContent = userId;
+      const modal = document.getElementById('payModal') || document.getElementById('pay-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+  } catch(e) {
+    alert('网络错误，请重试');
+  }
+}
+
+// ── 生成深度批命内容
+async function generateDeepContent() {
+  if (!_pd || !_rd) { alert('请先完成基础解读'); return; }
+  const card = document.getElementById('dcCard');
+  if (card) {
+    card.style.display = 'block';
+    ['dc1','dc2','dc3','dc4','dc5'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<p style="color:#999;text-align:center;">深度解读生成中…</p>';
+    });
+  }
+  try {
+    const resp = await fetch('https://api.yizhige.top/use-bazi-deep', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ userId, paipanData: _pd, basicResult: _rd })
+    });
+    const data = await resp.json();
+    if (data.error) { alert('错误: ' + data.error); return; }
+    const sections = ['dc1','dc2','dc3','dc4','dc5'];
+    const titles = ['格局与日主强弱','财官印食分析','婚恋与六亲','事业与财运走势','大运流年提示'];
+    sections.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && data[id]) {
+        el.innerHTML = '<h3 style="color:#8b4513;margin-bottom:10px;">🔮 ' + titles[i] + '</h3><p style="line-height:1.8;">' + data[id] + '</p>';
+      }
+    });
+  } catch(e) {
+    alert('深度解读请求失败，请重试');
+  }
+}
+
 </script>
 
   <div class="pay-overlay" id="payOverlay">
