@@ -825,8 +825,13 @@ function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
 function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
 function _hasQuota(){ return _getUses() < _LIMIT; }
 
-async function startReading() {
-  if (!_hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
+async function startReading() {   
+await fetch('https://api.yizhige.top/check-usage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: getUserId() })
+  }).catch(() => {});
+ if (!_hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
