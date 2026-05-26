@@ -722,6 +722,10 @@ html,body{
 </div>
 
 <script>
+(function(){
+  const ref = new URLSearchParams(location.search).get('ref');
+  if (ref) localStorage.setItem('yzg_ref', ref);
+})();
 // ══════════════════════════════════════════
 // 配置
 // ══════════════════════════════════════════
@@ -781,7 +785,17 @@ function getUserId() {
   if (!uid) {
     uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem('yzg_uid', uid);
-  }
+  }async function triggerReferral(userId) {
+  const refUserId = localStorage.getItem('yzg_ref');
+  if (!refUserId || refUserId === userId) return;
+  try {
+    await fetch('https://api.yizhige.top/complete-bazi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, refUserId })
+    });
+  } catch(_) {}
+}
   return uid;
 }
 
@@ -846,7 +860,7 @@ async function startReading() {
     _lastPaipanData = paipanData;
     _lastName = name;
     renderResult(name, paipanData, reading);
-
+    triggerReferral(getUserId());
   } catch(e) {
     clearInterval(t);
     document.getElementById('loadingState').style.display = 'none';
