@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -676,16 +676,17 @@ html,body{
       <div class="blur-preview" id="lockedPreview">
         此命格隐藏着一个极为罕见的转折信号…今年某月前后将有重大变化…贵人出现在意想不到的方向…
       </div>
-      <button class="btn-unlock" onclick="handleDeepUnlock()">解锁完整深批 · ¥19.9</button>
-<!-- 深度批命卡片 -->
-<div id="dcCard" style="display:none;margin-top:20px;">
-  <div class="section-card" id="dc1"></div>
-  <div class="section-card" id="dc2"></div>
-  <div class="section-card" id="dc3"></div>
-  <div class="section-card" id="dc4"></div>
-  <div class="section-card" id="dc5"></div>
-</div>
+      <button class="btn-unlock" id="btnUnlock" onclick="handleDeepUnlock()">解锁完整深批 · ¥19.9</button>
       <div class="price-note">一次性付费 · 永久查看 · 支持微信 / 支付宝</div>
+    </div>
+
+    <!-- 深批内容（解锁后显示） -->
+    <div id="deepSection" style="display:none; margin-top:24px;">
+      <div id="deepLoading" style="text-align:center;padding:32px;color:var(--gold-light);display:none;">
+        <div style="font-size:28px;margin-bottom:12px;">✦</div>
+        <div id="deepLoadStep">正在生成完整深批…</div>
+      </div>
+      <div id="deepContent" style="display:none;"></div>
     </div>
 
     <!-- 箴言 -->
@@ -775,6 +776,18 @@ function getKey() {
   return 'worker';
 }
 
+function getUserId() {
+  let uid = localStorage.getItem('yzg_uid');
+  if (!uid) {
+    uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('yzg_uid', uid);
+  }
+  return uid;
+}
+
+let _lastPaipanData = null;
+let _lastName = '';
+
 function setGender(v) {
   sex = v;
   document.getElementById('btn-male').className  = 'gender-btn' + (v===1?' active':'');
@@ -792,26 +805,14 @@ function showErr(msg) {
 // ══════════════════════════════════════════
 
 // 免费次数
-let _pd=null,_rd=null;
-function getUserId() {
-  let id = localStorage.getItem('yzg_uid');
-  if (!id) {
-    id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem('yzg_uid', id);
-  }
-  return id;
-}
+const _LIMIT = 3;
+const _KEY = 'yzg_uses';
+function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
+function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
+function _hasQuota(){ return _getUses() < _LIMIT; }
 
 async function startReading() {
-  const _useResp = await fetch('https://api.yizhige.top/use-bazi', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: getUserId() })
-  }).catch(() => null);
-  if (_useResp && _useResp.status === 403) {
-    document.getElementById('payOverlay').classList.add('show');
-    return;
-  }
+  if (!_hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
@@ -841,6 +842,9 @@ async function startReading() {
     const reading = await callClaude(key, paipanData);
 
     clearInterval(t);
+    _addUse(); 
+    _lastPaipanData = paipanData;
+    _lastName = name;
     renderResult(name, paipanData, reading);
 
   } catch(e) {
@@ -927,7 +931,6 @@ async function callClaude(apiKey, paipanData) {
 // 渲染结果
 // ══════════════════════════════════════════
 function renderResult(name, pd, r) {
-  _pd=pd; _rd=r;
   document.getElementById('loadingState').style.display = 'none';
 
   // 显示名字
@@ -1023,8 +1026,164 @@ function renderResult(name, pd, r) {
 // ══════════════════════════════════════════
 // 工具函数
 // ══════════════════════════════════════════
-function handleUnlock() {
-  alert('支付功能开发中\n接入微信支付 / 支付宝后上线');
+async function handleDeepUnlock() {
+  const userId = getUserId();
+  const btn = document.getElementById('btnUnlock');
+  btn.disabled = true;
+  btn.textContent = '处理中…';
+
+  try {
+    const r = await fetch('https://api.yizhige.top/use-bazi-deep', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await r.json();
+
+    if (!r.ok) {
+      if (data.error === 'no_credits') {
+        alert('积分不足，请联系客服充值后解锁。');
+      } else {
+        alert('解锁失败：' + (data.error || '未知错误'));
+      }
+      btn.disabled = false;
+      btn.textContent = '解锁完整深批 · ¥19.9';
+      return;
+    }
+
+    // 扣积分成功，生成深批
+    btn.style.display = 'none';
+    await generateDeepContent(userId);
+
+  } catch(e) {
+    alert('网络错误：' + e.message);
+    btn.disabled = false;
+    btn.textContent = '解锁完整深批 · ¥19.9';
+  }
+}
+
+async function generateDeepContent(userId) {
+  const section = document.getElementById('deepSection');
+  const loading = document.getElementById('deepLoading');
+  const contentDiv = document.getElementById('deepContent');
+
+  section.style.display = 'block';
+  loading.style.display = 'block';
+  contentDiv.style.display = 'none';
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const steps = ['分析命局深层结构…', '推算流年关键节点…', '解读感情财运密码…', '生成完整深批报告…'];
+  let si = 0;
+  const t = setInterval(() => {
+    si = (si + 1) % steps.length;
+    document.getElementById('deepLoadStep').textContent = steps[si];
+  }, 1800);
+
+  try {
+    const pd = _lastPaipanData;
+    const name = _lastName || '命主';
+    const bi = pd?.bazi_info || {};
+    const base = pd?.base_info || {};
+
+    const dataStr = JSON.stringify({
+      四柱: bi.bazi || [],
+      天干十神: bi.tg_cg_god || [],
+      藏干: bi.dz_cg || [],
+      长生: bi.day_cs || [],
+      纳音: bi.na_yin || [],
+      大运: pd?.dayun_info?.big || [],
+      大运起始年: pd?.dayun_info?.big_start_year || [],
+      空亡: bi.kw || '',
+      命格: base.zhengge || '',
+      起运: base.qiyun || ''
+    }, null, 2);
+
+    const prompt = `请对以下八字进行【完整深度批命】，远比基础解读更深入详尽。
+
+【命主】${name}
+【排盘数据】
+${dataStr}
+
+【深批要求】请输出JSON格式，字段如下：
+{
+  "title": "深批标题，如"甲木日主·偏财格命局深批"",
+  "core_secret": "命局核心秘密，200字内，说出普通人看不出的深层规律，要有震撼感",
+  "personality_deep": "性格深度剖析，150字内，区分表面与内在，说出矛盾与挣扎",
+  "career_detail": "事业详批，150字内，给出最适合方向、贵人类型、何时起势",
+  "wealth_detail": "财运详批，150字内，说明财从何来、何年最旺、注意哪些陷阱",
+  "love_detail": "感情详批，150字内，说出姻缘时机、对方特征、需注意的感情模式",
+  "year_forecast": "今年运势，150字内，结合当前大运流年，说具体月份的关键节点",
+  "turning_points": "命中转折点，100字内，列出2-3个关键年份及对应变化",
+  "action_advice": "行动建议，100字内，给出最实用的3条趋吉避凶建议"
+}
+
+直接输出JSON，不要markdown代码块。`;
+
+    const resp = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 3000,
+        system: BAZI_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    clearInterval(t);
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || '生成失败 ' + resp.status);
+    }
+
+    const data = await resp.json();
+    const raw = data.content?.find(b => b.type === 'text')?.text || '';
+    let deep;
+    try {
+      deep = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) deep = JSON.parse(m[0]);
+      else throw new Error('解析深批内容失败，请重试');
+    }
+
+    loading.style.display = 'none';
+    contentDiv.style.display = 'block';
+    contentDiv.innerHTML = renderDeepContent(deep);
+
+  } catch(e) {
+    clearInterval(t);
+    loading.style.display = 'none';
+    contentDiv.style.display = 'block';
+    contentDiv.innerHTML = '<div style="color:#e88;padding:24px;text-align:center;">深批生成失败：' + e.message + '<br><br><button onclick="generateDeepContent()" style="padding:10px 24px;background:var(--gold);border:none;border-radius:8px;cursor:pointer;">重试</button></div>';
+  }
+}
+
+function renderDeepContent(d) {
+  const sections = [
+    { icon: '✦', title: '命局核心秘密', key: 'core_secret', color: '#f0c060' },
+    { icon: '◈', title: '性格深度剖析', key: 'personality_deep', color: '#c8a8f0' },
+    { icon: '◆', title: '事业详批', key: 'career_detail', color: '#80d0ff' },
+    { icon: '◇', title: '财运详批', key: 'wealth_detail', color: '#80ffb0' },
+    { icon: '♡', title: '感情详批', key: 'love_detail', color: '#ffb0c0' },
+    { icon: '◎', title: '今年运势', key: 'year_forecast', color: '#f0e060' },
+    { icon: '▷', title: '命中转折点', key: 'turning_points', color: '#ffcc80' },
+    { icon: '★', title: '行动建议', key: 'action_advice', color: '#a0ffa0' },
+  ];
+
+  const titleHtml = d.title ? '<div style="text-align:center;font-size:20px;font-weight:bold;color:var(--gold-light);padding:20px 0 8px;letter-spacing:2px;">' + d.title + '</div><div style="text-align:center;color:#888;font-size:13px;margin-bottom:24px;">— 完整深批报告 —</div>' : '';
+
+  const blocksHtml = sections.map(s => {
+    const text = d[s.key] || '';
+    if (!text) return '';
+    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px;margin-bottom:14px;">' +
+      '<div style="font-size:13px;color:' + s.color + ';margin-bottom:8px;letter-spacing:1px;">' + s.icon + ' ' + s.title + '</div>' +
+      '<div style="font-size:15px;line-height:1.8;color:#e8e0d0;">' + text + '</div>' +
+      '</div>';
+  }).join('');
+
+  return titleHtml + blocksHtml;
 }
 
 function handleShare() {
@@ -1049,70 +1208,6 @@ function resetAll() {
   document.getElementById('btnStart').style.display = 'flex';
   window.scrollTo({ top:0, behavior:'smooth' });
 }
-
-// ── 深度批命解锁入口
-async function handleDeepUnlock() {
-  const userId = getUserId();
-  if (!userId) { alert('请先提交八字进行基础解读'); return; }
-  try {
-    const r = await fetch('https://api.yizhige.top/user-info?userId=' + encodeURIComponent(userId));
-    const d = await r.json();
-    if (d.bazi_credits && d.bazi_credits > 0) {
-      await generateDeepContent();
-    } else {
-      const el = document.getElementById('payUserId');
-      if (el) el.textContent = userId;
-      const modal = document.getElementById('payOverlay') || document.getElementById('payModal') || document.getElementById('pay-modal');
-      if (modal) modal.style.display = 'flex';
-    }
-  } catch(e) {
-    alert('网络错误，请重试');
-  }
-}
-
-// ── 生成深度批命内容
-async function generateDeepContent() {
-  const userId = getUserId();
-  if (!_pd || !_rd) { alert('请先完成基础解读'); return; }
-  const card = document.getElementById('dcCard');
-  if (card) {
-    card.style.display = 'block';
-    ['dc1','dc2','dc3','dc4','dc5'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<p style="color:#999;text-align:center;">深度解读生成中…</p>';
-    });
-  }
-  try {
-    // 第一步：扣除积分
-    const creditResp = await fetch('https://api.yizhige.top/use-bazi-deep', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ userId })
-    });
-    const creditData = await creditResp.json();
-    if (creditData.error) { alert('错误: ' + creditData.error); return; }
-    // 第二步：调用Claude生成深度内容
-    const prompt = '你是专业八字命理师，请基于以下排盘数据和基础解读，生成深度批命报告。\n\n排盘数据：' + JSON.stringify(_pd) + '\n\n基础解读：' + JSON.stringify(_rd) + '\n\n请分5个部分输出，每部分300-500字，严格用以下XML格式：\n<dc1>格局与日主强弱分析</dc1>\n<dc2>财官印食神详解</dc2>\n<dc3>婚恋与六亲缘分</dc3>\n<dc4>事业财运走势</dc4>\n<dc5>大运流年具体提示</dc5>';
-    const aiResp = await fetch('https://api.yizhige.top/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
-    });
-    const aiData = await aiResp.json();
-    const text = aiData.content?.[0]?.text || '';
-    const titles = ['格局与日主强弱','财官印食分析','婚恋与六亲','事业与财运走势','大运流年提示'];
-    ['dc1','dc2','dc3','dc4','dc5'].forEach((id, i) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const match = text.match(new RegExp('<' + id + '>([\\s\\S]*?)<\\/' + id + '>'));
-      const content = match ? match[1].trim() : '解读生成中，请稍候...';
-      el.innerHTML = '<h3 style="color:#8b4513;margin-bottom:10px;">🔮 ' + titles[i] + '</h3><p style="line-height:1.8;">' + content + '</p>';
-    });
-  } catch(e) {
-    alert('深度解读请求失败，请重试');
-  }
-}
-
 </script>
 
   <div class="pay-overlay" id="payOverlay">
