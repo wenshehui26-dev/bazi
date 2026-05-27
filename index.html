@@ -24,7 +24,6 @@
   --red:#C4503A;
 }
 
-
 html,body{
   background:var(--ink);
   color:var(--text);
@@ -786,7 +785,11 @@ function getUserId() {
   if (!uid) {
     uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem('yzg_uid', uid);
-  }async function triggerReferral(userId) {
+  }
+  return uid;
+}
+
+async function triggerReferral(userId) {
   const refUserId = localStorage.getItem('yzg_ref');
   if (!refUserId || refUserId === userId) return;
   try {
@@ -797,7 +800,6 @@ function getUserId() {
     });
   } catch(_) {}
 }
-  
 
 let _lastPaipanData = null;
 let _lastName = '';
@@ -825,16 +827,6 @@ function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
 function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
 function _hasQuota(){ return _getUses() < _LIMIT; }
 
-
-const refUserId = localStorage.getItem('yzg_ref');
-  if (!refUserId || refUserId === userId) return;
-  try {
-    async function triggerReferral(userId) {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, refUserId })
-    });
-  } catch(_) {}
 async function startReading() {   
 await fetch('https://api.yizhige.top/check-usage', {
     method: 'POST',
