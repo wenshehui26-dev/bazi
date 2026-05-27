@@ -829,7 +829,7 @@ function _hasQuota(){ return _getUses() < _LIMIT; }
 const refUserId = localStorage.getItem('yzg_ref');
   if (!refUserId || refUserId === userId) return;
   try {
-    await fetch('https://api.yizhige.top/complete-bazi', {
+    async function triggerReferral(userId) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, refUserId })
