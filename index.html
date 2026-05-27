@@ -678,6 +678,17 @@ html,body{
       </div>
       <button class="btn-unlock" id="btnUnlock" onclick="handleDeepUnlock()">解锁完整深批 · ¥19.9</button>
       <div class="price-note">一次性付费 · 永久查看 · 支持微信 / 支付宝</div>
+      <div id="creditStatus" style="margin-top:12px;font-size:0.75rem;color:var(--gold);display:none;">
+        🎴 当前积分：<b id="creditCount">0</b> 次深批
+      </div>
+      <div class="share-earn" style="margin-top:14px;padding:12px;background:rgba(196,146,42,0.06);border:0.5px solid var(--border);border-radius:10px;">
+        <div style="font-size:0.72rem;color:var(--gold);margin-bottom:8px;">📤 邀请好友得积分 · 1次深批免费</div>
+        <div style="display:flex;gap:6px;">
+          <input id="shareUrl" readonly style="flex:1;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 8px;color:var(--muted);font-size:0.68rem;outline:none;" />
+          <button onclick="copyShareUrl()" style="padding:6px 10px;background:rgba(196,146,42,0.12);border:0.5px solid var(--border2);border-radius:6px;color:var(--gold-light);font-size:0.72rem;cursor:pointer;white-space:nowrap;">复制</button>
+        </div>
+        <div style="font-size:0.65rem;color:var(--muted);margin-top:6px;">好友完成八字解读 → 你得1积分 → 免费深批</div>
+      </div>
     </div>
 
     <!-- 深批内容（解锁后显示） -->
@@ -1042,6 +1053,23 @@ function renderResult(name, pd, r) {
 
   document.getElementById('resultBlock').style.display = 'block';
   document.getElementById('resultBlock').scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // 填入分享链接
+  const shareUrl = location.origin + location.pathname + '?ref=' + getUserId();
+  const shareInput = document.getElementById('shareUrl');
+  if (shareInput) shareInput.value = shareUrl;
+
+  // 查积分并显示
+  fetch('https://api.yizhige.top/user-info?userId=' + getUserId())
+    .then(r => r.json())
+    .then(data => {
+      const credits = data.bazi_credits || 0;
+      if (credits > 0) {
+        document.getElementById('creditCount').textContent = credits;
+        document.getElementById('creditStatus').style.display = 'block';
+        document.getElementById('btnUnlock').textContent = '使用积分解锁深批（剩余' + credits + '次）';
+      }
+    }).catch(() => {});
 }
 
 // ══════════════════════════════════════════
@@ -1062,8 +1090,8 @@ async function handleDeepUnlock() {
     const data = await r.json();
 
     if (!r.ok) {
-      if (data.error === 'no_credits') {
-        alert('积分不足，请联系客服充值后解锁。');
+      if (data.error === 'insufficient_credits') {
+        alert('积分不足，邀请好友或联系客服充值后解锁。');
       } else {
         alert('解锁失败：' + (data.error || '未知错误'));
       }
@@ -1221,6 +1249,17 @@ function handleCopy() {
     document.body.appendChild(el); el.select();
     document.execCommand('copy'); document.body.removeChild(el);
     alert('链接已复制 ✓');
+  });
+}
+
+function copyShareUrl() {
+  const url = document.getElementById('shareUrl').value;
+  navigator.clipboard?.writeText(url).then(()=>alert('邀请链接已复制 ✓')).catch(()=>{
+    const el = document.createElement('textarea');
+    el.value = url;
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    alert('邀请链接已复制 ✓');
   });
 }
 
