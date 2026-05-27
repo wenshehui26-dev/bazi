@@ -797,8 +797,7 @@ function getUserId() {
     });
   } catch(_) {}
 }
-  return uid;
-}
+  
 
 let _lastPaipanData = null;
 let _lastName = '';
@@ -826,6 +825,10 @@ function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
 function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
 function _hasQuota(){ return _getUses() < _LIMIT; }
 
+
+async function triggerReferral(userId) {
+  ...
+}
 async function startReading() {   
 await fetch('https://api.yizhige.top/check-usage', {
     method: 'POST',
