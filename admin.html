@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易知阁 · 后台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;
+  --surface:#161616;
+  --surface2:#1e1e1e;
+  --border:#2a2a2a;
+  --border2:#333;
+  --text:#e8e4dc;
+  --muted:#6b6560;
+  --accent:#c8a96e;
+  --accent2:#8b6e42;
+  --red:#c0392b;
+  --green:#4a7c59;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Noto Serif SC',serif;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--serif)}
+
+/* ── LOGIN ── */
+#login-screen{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse at 50% 30%,#1a1510 0%,var(--bg) 70%);
+}
+.login-box{
+  width:320px;padding:2.5rem;
+  border:1px solid var(--border2);
+  background:var(--surface);
+}
+.login-title{
+  font-size:22px;font-weight:600;letter-spacing:.05em;
+  color:var(--accent);margin-bottom:.3rem;
+}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:2rem;letter-spacing:.1em;text-transform:uppercase}
+.login-box input{
+  width:100%;padding:10px 12px;
+  background:var(--bg);border:1px solid var(--border2);
+  color:var(--text);font-family:var(--mono);font-size:13px;
+  outline:none;margin-bottom:12px;
+  transition:border-color .2s;
+}
+.login-box input:focus{border-color:var(--accent)}
+.login-box button{
+  width:100%;padding:10px;background:var(--accent);border:none;
+  color:#0d0d0d;font-family:var(--serif);font-size:14px;font-weight:600;
+  cursor:pointer;letter-spacing:.05em;transition:opacity .2s;
+}
+.login-box button:hover{opacity:.85}
+.login-err{font-size:12px;color:var(--red);margin-top:8px;font-family:var(--mono)}
+
+/* ── PANEL ── */
+#panel{display:none;min-height:100vh}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;border-bottom:1px solid var(--border);
+  background:var(--surface);position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-size:15px;font-weight:600;color:var(--accent);letter-spacing:.08em}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.btn{
+  padding:6px 14px;background:transparent;border:1px solid var(--border2);
+  color:var(--text);font-family:var(--serif);font-size:12px;cursor:pointer;
+  letter-spacing:.05em;transition:all .2s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#0d0d0d;font-weight:600}
+.btn-primary:hover{opacity:.85;color:#0d0d0d}
+
+.main{padding:32px;max-width:960px;margin:0 auto}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
+.stat-card{
+  padding:20px;background:var(--surface);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent);opacity:.4;
+}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.stat-value{font-size:28px;font-weight:600;color:var(--accent);font-family:var(--mono)}
+
+/* ── ADD CREDITS ── */
+.section-title{
+  font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.add-form{
+  display:flex;gap:10px;align-items:flex-end;margin-bottom:32px;
+  background:var(--surface);border:1px solid var(--border);padding:20px;
+}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.form-group input,.form-group select{
+  padding:8px 12px;background:var(--bg);border:1px solid var(--border2);
+  color:var(--text);font-family:var(--mono);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group select option{background:var(--bg)}
+.add-result{font-family:var(--mono);font-size:12px;padding:8px 12px;margin-top:8px}
+.ok{color:var(--green);background:rgba(74,124,89,.1);border:1px solid rgba(74,124,89,.3)}
+.fail{color:var(--red);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3)}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);overflow:hidden}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+}
+.table-header span{font-size:12px;color:var(--muted);font-family:var(--mono)}
+table{width:100%;border-collapse:collapse}
+th{
+  text-align:left;padding:10px 20px;
+  font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);font-weight:400;
+}
+td{
+  padding:12px 20px;border-bottom:1px solid var(--border);
+  font-size:13px;color:var(--text);
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(200,169,110,.03)}
+.mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.badge{
+  display:inline-block;font-size:11px;padding:2px 8px;
+  font-family:var(--mono);letter-spacing:.05em;
+}
+.badge-bazi{background:rgba(200,169,110,.15);color:var(--accent);border:1px solid rgba(200,169,110,.3)}
+.badge-shouxiang{background:rgba(74,124,89,.15);color:#6ab584;border:1px solid rgba(74,124,89,.3)}
+.credit-num{font-family:var(--mono);font-weight:500;color:var(--accent)}
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
+.loading-row td{text-align:center;padding:2rem;color:var(--muted);font-family:var(--mono);font-size:12px}
+
+@media(max-width:700px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .add-form{flex-direction:column}
+  .main{padding:16px}
+  .topbar{padding:12px 16px}
+  .mono{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-title">易知阁</div>
+    <div class="login-sub">后台管理系统</div>
+    <input type="password" id="key-input" placeholder="Admin Key" autocomplete="off"/>
+    <button onclick="doLogin()">进入后台</button>
+    <div id="login-err" class="login-err"></div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel">
+  <div class="topbar">
+    <div class="topbar-title">易知阁 · 后台</div>
+    <div class="topbar-right">
+      <span id="last-refresh" style="font-size:11px;color:var(--muted);font-family:var(--mono)"></span>
+      <button class="btn" onclick="loadStats()">刷新</button>
+      <button class="btn" onclick="logout()">退出</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">总用户数</div>
+        <div class="stat-value" id="s-users">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">付费用户</div>
+        <div class="stat-value" id="s-paid">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">累计发出积分</div>
+        <div class="stat-value" id="s-credits">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">日志条数</div>
+        <div class="stat-value" id="s-logs">—</div>
+      </div>
+    </div>
+
+    <!-- ADD CREDITS -->
+    <div class="section-title">手动加积分</div>
+    <div class="add-form">
+      <div class="form-group">
+        <div class="form-label">用户 ID</div>
+        <input type="text" id="f-userid" placeholder="输入 userId" style="width:220px"/>
+      </div>
+      <div class="form-group">
+        <div class="form-label">产品</div>
+        <select id="f-product">
+          <option value="bazi">八字</option>
+          <option value="shouxiang">手相</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">积分数</div>
+        <input type="number" id="f-credits" value="1" min="1" style="width:80px"/>
+      </div>
+      <button class="btn btn-primary" onclick="addCredits()">确认加积分</button>
+    </div>
+    <div id="add-result"></div>
+
+    <!-- LOG TABLE -->
+    <div style="margin-top:24px">
+      <div class="section-title">积分发放记录</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <span>最近 100 条</span>
+          <span id="log-count"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>时间 (UTC)</th>
+              <th>用户 ID</th>
+              <th>产品</th>
+              <th>积分</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <tr class="loading-row"><td colspan="4">加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://api.yizhige.top';
+let adminKey = '';
+
+function doLogin(){
+  const k = document.getElementById('key-input').value.trim();
+  if(!k){document.getElementById('login-err').textContent='请输入 Key';return;}
+  adminKey = k;
+  document.getElementById('login-err').textContent='';
+  loadStats();
+}
+
+async function loadStats(){
+  try{
+    const r = await fetch(`${API}/admin/stats?key=${encodeURIComponent(adminKey)}`);
+    if(r.status===401){
+      adminKey='';
+      document.getElementById('login-err').textContent='Key 不正确';
+      document.getElementById('panel').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+      return;
+    }
+    const d = await r.json();
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('panel').style.display='block';
+
+    document.getElementById('s-users').textContent   = d.total_users ?? '—';
+    document.getElementById('s-paid').textContent    = d.paid_users  ?? '—';
+    document.getElementById('s-credits').textContent = d.total_credits_added ?? '—';
+
+    const logs = d.logs || [];
+    document.getElementById('s-logs').textContent  = logs.length;
+    document.getElementById('log-count').textContent = `共 ${logs.length} 条`;
+
+    const now = new Date();
+    document.getElementById('last-refresh').textContent =
+      `刷新于 ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+
+    const tbody = document.getElementById('log-body');
+    if(!logs.length){
+      tbody.innerHTML='<tr><td colspan="4" class="empty">暂无记录，下次手动加积分后会在这里显示</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(l=>{
+      const note = l.note || '';
+      const isShouxiang = note.includes('shouxiang');
+      const prod = isShouxiang ? '手相' : '八字';
+      const badgeCls = isShouxiang ? 'badge-shouxiang' : 'badge-bazi';
+      const t = (l.created_at||'').replace('T',' ').slice(0,16);
+      return `<tr>
+        <td class="mono">${t}</td>
+        <td class="mono">${l.user_id}</td>
+        <td><span class="badge ${badgeCls}">${prod}</span></td>
+        <td><span class="credit-num">+${l.credits}</span></td>
+      </tr>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    document.getElementById('log-body').innerHTML=
+      `<tr><td colspan="4" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+async function addCredits(){
+  const userId  = document.getElementById('f-userid').value.trim();
+  const product = document.getElementById('f-product').value;
+  const credits = parseInt(document.getElementById('f-credits').value)||1;
+  const el = document.getElementById('add-result');
+
+  if(!userId){el.innerHTML='<div class="add-result fail">请输入用户 ID</div>';return;}
+
+  try{
+    const r = await fetch(
+      `${API}/admin/add-credits?key=${encodeURIComponent(adminKey)}&userId=${encodeURIComponent(userId)}&product=${product}&credits=${credits}`
+    );
+    const d = await r.json();
+    if(d.ok){
+      el.innerHTML=`<div class="add-result ok">✓ 已为 ${userId} 添加 ${credits} 积分，当前余额：${d[product==='bazi'?'bazi_credits':'shouxiang_credits']}</div>`;
+      document.getElementById('f-userid').value='';
+      setTimeout(loadStats, 500);
+    } else {
+      el.innerHTML=`<div class="add-result fail">失败：${JSON.stringify(d)}</div>`;
+    }
+  }catch(e){
+    el.innerHTML=`<div class="add-result fail">${e.message}</div>`;
+  }
+}
+
+function logout(){
+  adminKey='';
+  document.getElementById('panel').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('key-input').value='';
+}
+
+document.getElementById('key-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter') doLogin();
+});
+</script>
+</body>
+</html>
