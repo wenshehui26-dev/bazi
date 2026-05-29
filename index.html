@@ -1091,7 +1091,7 @@ async function handleDeepUnlock() {
 
     if (!r.ok) {
       if (data.error === 'insufficient_credits') {
-        showPaymentModal();
+       document.getElementById('payOverlay').classList.add('show');
       } else {
         alert('解锁失败：' + (data.error || '未知错误'));
       }
@@ -1273,8 +1273,8 @@ function resetAll() {
   <div class="pay-overlay" id="payOverlay">
     <div class="pay-box">
       <span class="pay-close" onclick="document.getElementById('payOverlay').classList.remove('show')">✕</span>
-      <div class="pay-title">✦ 免费次数已用完</div>
-      <div class="pay-sub">扫码付款解锁更多次数</div>
+      <div class="pay-title">积分不足，请充值</div>
+     <div class="pay-sub">扫码¥19.9，解锁1次八字深批</div>
 <img class="pay-qr" src="https://wenshehui26-dev.github.io/bazi/qr_1990.jpg.jpg" style="width:240px;height:240px;border-radius:8px;">
       <div class="pay-tip">
      付款后截图发微信，24小时内手动发放积分
