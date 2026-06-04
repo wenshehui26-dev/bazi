@@ -937,6 +937,7 @@ async function callClaude(apiKey, paipanData) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1500,
+      temperature: 0.3,
       system: BAZI_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userMsg }]
     })
