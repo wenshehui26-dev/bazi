@@ -1175,6 +1175,7 @@ ${dataStr}
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 3000,
+        temperature: 0.3,
         system: BAZI_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }]
       })
