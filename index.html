@@ -844,7 +844,7 @@ await fetch('https://api.yizhige.top/check-usage', {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId: getUserId() })
   }).catch(() => {});
- if (!_hasQuota()) { document.getElementById("payOverlay").classList.add("show"); return; }
+    if (!_hasQuota()) { openPay('bazi_basic'); return; }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
@@ -1091,8 +1091,8 @@ async function handleDeepUnlock() {
     const data = await r.json();
 
     if (!r.ok) {
-      if (data.error === 'insufficient_credits') {
-       document.getElementById('payOverlay').classList.add('show');
+            if (data.error === 'insufficient_credits') {
+          openPay('bazi_deep');
       } else {
         alert('解锁失败：' + (data.error || '未知错误'));
       }
@@ -1273,48 +1273,122 @@ function resetAll() {
 </script>
 
   <div class="pay-overlay" id="payOverlay">
-    <div class="pay-box">
-      <span class="pay-close" onclick="document.getElementById('payOverlay').classList.remove('show')">✕</span>
-      <div class="pay-title">积分不足，请充值</div>
-     <div class="pay-sub">扫码¥19.9，解锁1次八字深批</div>
-<img class="pay-qr" src="https://wenshehui26-dev.github.io/bazi/qr_1990.jpg.jpg" style="width:240px;height:240px;border-radius:8px;">
-      <div class="pay-tip">
-     付款后截图发微信，24小时内手动发放积分
-       
-      </div>
-    </div>
+  <div class="pay-box">
+    <span class="pay-close" onclick="closePay()">✕</span>
+    <div class="pay-title" id="payTitle"></div>
+    <div class="pay-sub" id="paySub"></div>
+    <img class="pay-qr" id="payQr" alt="" style="width:240px;height:240px;display:none">
+    <div class="pay-tip" id="payTip"></div>
   </div>
+</div>
 <script>
 fetch('https://api.yizhige.top/check-usage', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ userId: getUserId() })
 }).catch(() => {});
+
+const PAY_API = 'https://api.yizhige.top';
+const PAY_QR = { bazi_basic: 'qr_990.png', bazi_deep: 'qr_1990.png' };
+let _payProduct = null, _payPoll = null, _payTick = null, _payToken = 0;
+
+function _payStop() { clearInterval(_payPoll); clearInterval(_payTick); _payPoll = _payTick = null; }
+
+function closePay() {
+  _payToken++;
+  _payStop();
+  document.getElementById('payOverlay').classList.remove('show');
+}
+
+function _payShow(title, sub, tip, qr) {
+  document.getElementById('payTitle').textContent = title;
+  document.getElementById('paySub').textContent = sub || '';
+  document.getElementById('payTip').textContent = tip || '';
+  const img = document.getElementById('payQr');
+  if (qr) { img.src = 'https://wenshehui26-dev.github.io/bazi/' + qr; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+}
+
+function _payDone(product) {
+  fetch(PAY_API + '/check-usage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: getUserId() })
+  }).catch(() => {});
+  if (product === 'bazi_basic') {
+    localStorage.setItem(_KEY, Math.max(0, _getUses() - 1));
+    startReading();
+  } else {
+    handleDeepUnlock();
+  }
+}
+
+async function openPay(product) {
+  _payStop();
+  const token = ++_payToken;
+  _payProduct = product;
+  document.getElementById('payOverlay').classList.add('show');
+  _payShow('正在生成订单…', '', '', null);
+
+  let r, d;
+  try {
+    r = await fetch(PAY_API + '/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: getUserId(), product })
+    });
+    d = await r.json().catch(() => ({}));
+  } catch (e) {
+    if (token !== _payToken) return;
+    _payShow('网络错误', '', '请关闭后重试', null);
+    return;
+  }
+  if (token !== _payToken) return;
+
+  if (r.status === 409) {
+    _payShow('当前有人在付款', '', '请 ' + (d.retry_after || 30) + ' 秒后重试', null);
+    return;
+  }
+  if (r.status === 400 && d.error === 'not_needed') {
+    closePay();
+    _payDone(product);
+    return;
+  }
+  if (!r.ok) {
+    _payShow('下单失败', '', String(d.error || r.status), null);
+    return;
+  }
+
+  const orderId = d.orderId;
+  const expiresAt = d.expires_at;
+  const yuan = (d.amount_cents / 100).toFixed(2);
+  _payShow('请支付 ¥' + yuan, '', '请按此金额准确支付，到账后自动解锁，请勿关闭页面', PAY_QR[product]);
+
+  const tick = () => {
+    const left = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+    const m = String(Math.floor(left / 60)).padStart(2, '0');
+    const s = String(left % 60).padStart(2, '0');
+    document.getElementById('paySub').textContent = '10 分钟内有效 · 剩余 ' + m + ':' + s;
+  };
+  tick();
+  _payTick = setInterval(tick, 1000);
+
+  _payPoll = setInterval(async () => {
+    try {
+      const sr = await fetch(PAY_API + '/order-status?id=' + encodeURIComponent(orderId));
+      const sd = await sr.json();
+      if (token !== _payToken) return;
+      if (sd.status === 'paid') {
+        closePay();
+        _payDone(product);
+      } else if (sd.status === 'expired') {
+        _payStop();
+        _payShow('订单已过期', '', '正在重新下单…', null);
+        setTimeout(() => { if (token === _payToken) openPay(product); }, 1500);
+      }
+    } catch (_) {}
+  }, 3000);
+}
 </script>
-  <script>
-function showPaymentModal() {
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:#13131E;border:1px solid rgba(196,146,42,0.4);border-radius:16px;padding:24px;max-width:340px;width:90%;text-align:center;">
-      <h3 style="color:#C4922A;margin-bottom:8px;">积分不足，请充值</h3>
-      <p style="color:#EAE4D8;font-size:14px;margin-bottom:16px;">扫码付款后联系客服添加积分</p>
-      <div style="display:flex;gap:16px;justify-content:center;margin-bottom:16px;">
-        <div>
-          <img src="https://wenshehui26-dev.github.io/bazi/qr_990.jpg.jpg" style="width:130px;height:130px;border-radius:8px;">
-          <p style="color:#C4922A;margin-top:8px;font-weight:bold;">¥9.9 · 1次深批</p>
-        </div>
-        <div>
-          <img src="https://wenshehui26-dev.github.io/bazi/qr_1990.jpg.jpg" style="width:130px;height:130px;border-radius:8px;">
-          <p style="color:#C4922A;margin-top:8px;font-weight:bold;">¥19.9 · 3次深批</p>
-        </div>
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" style="background:rgba(196,146,42,0.2);color:#C4922A;border:1px solid rgba(196,146,42,0.4);padding:10px 24px;border-radius:8px;cursor:pointer;">关闭</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
-} 
-</script>    
-</body>
-</html>
+   </body>
+   </html>
