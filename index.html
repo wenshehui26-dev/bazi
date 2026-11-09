@@ -835,8 +835,8 @@ function showErr(msg) {
 const _LIMIT = 3;
 const _KEY = 'yzg_uses';
 function _getUses(){ return parseInt(localStorage.getItem(_KEY)||'0'); }
-function _addUse(){ localStorage.setItem(_KEY, _getUses()+1); }
-function _hasQuota(){ return _getUses() < _LIMIT; }
+async function _addUse(){ try{ await fetch('https://api.yizhige.top/use-bazi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:getUserId()})}); }catch(e){} }
+async function _hasQuota(){ try{ const r=await fetch('https://api.yizhige.top/check-usage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:getUserId()})}); const u=await r.json(); return (u.bazi_uses||0) < 3+(u.bazi_credits||0); }catch(e){ return true; } }
 
 async function startReading() {   
 await fetch('https://api.yizhige.top/check-usage', {
@@ -844,7 +844,7 @@ await fetch('https://api.yizhige.top/check-usage', {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId: getUserId() })
   }).catch(() => {});
-    if (!_hasQuota()) { openPay('bazi_basic'); return; }
+    if (!(await _hasQuota())) { openPay('bazi_basic'); return; }
   const key   = getKey();
   const name  = document.getElementById('name').value.trim() || '命主';
   const year  = document.getElementById('year').value;
@@ -874,7 +874,7 @@ await fetch('https://api.yizhige.top/check-usage', {
     const reading = await callClaude(key, paipanData);
 
     clearInterval(t);
-    _addUse(); 
+    await _addUse(); 
     _lastPaipanData = paipanData;
     _lastName = name;
     renderResult(name, paipanData, reading);
@@ -1316,7 +1316,6 @@ function _payDone(product) {
     body: JSON.stringify({ userId: getUserId() })
   }).catch(() => {});
   if (product === 'bazi_basic') {
-    localStorage.setItem(_KEY, Math.max(0, _getUses() - 1));
     startReading();
   } else {
     handleDeepUnlock();
