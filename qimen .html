@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>奇门 · AI奇门遁甲解盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--gold:#C4922A;--gold-light:#E2C06A;--ink:#080810;--card:#13131E;--card2:#1A1A28;--border:rgba(196,146,42,0.18);--border2:rgba(196,146,42,0.4);--text:#EAE4D8;--muted:#8a847c}
+html,body{background:var(--ink);color:var(--text);font-family:-apple-system,'PingFang SC','Noto Sans SC',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:500px;margin:0 auto;padding:0 0 4rem}
+.hero{text-align:center;padding:2.2rem 1.5rem 1.2rem}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2rem;font-weight:300;color:var(--gold-light);letter-spacing:.18em;margin-bottom:.4rem}
+.hero p{font-size:.78rem;color:var(--muted);letter-spacing:.2em}
+.card{margin:0 1.25rem 1rem;background:var(--card);border:.5px solid var(--border);border-radius:16px;padding:1.25rem}
+.label{font-size:.72rem;color:var(--muted);margin-bottom:.4rem}
+.input{width:100%;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-size:.9rem;font-family:inherit;outline:none}
+.input:focus{border-color:var(--border2)}
+textarea.input{resize:none;height:84px;line-height:1.6}
+.field{margin-bottom:1rem}
+.btn{width:calc(100% - 2.5rem);margin:0 1.25rem 1rem;padding:1rem;background:linear-gradient(135deg,rgba(196,146,42,.22),rgba(196,146,42,.08));border:.5px solid rgba(196,146,42,.45);border-radius:12px;color:var(--gold-light);font-size:1rem;letter-spacing:.15em;cursor:pointer}
+.btn:disabled{opacity:.4}
+.note{margin:0 1.25rem 1rem;font-size:.7rem;color:var(--muted);line-height:1.7;text-align:center}
+.err{margin:0 1.25rem 1rem;background:rgba(196,80,58,.08);border:.5px solid rgba(196,80,58,.3);border-radius:10px;padding:.9rem 1rem;font-size:.8rem;color:#F09080;display:none}
+#loading{display:none;text-align:center;padding:2.5rem 1.5rem;color:var(--gold-light)}
+#result{display:none}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.78rem;color:var(--muted);margin-bottom:.9rem}
+.meta b{color:var(--gold-light);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.cell{background:var(--card2);border:.5px solid var(--border);border-radius:8px;padding:.5rem .3rem;text-align:center;font-size:.72rem;line-height:1.55;min-height:92px}
+.cell .pn{color:var(--gold);font-size:.66rem;margin-bottom:.15rem}
+.cell .dei{color:#9ab8e0}
+.cell .star{color:var(--text)}
+.cell .gate{color:var(--gold-light)}
+.cell .gan{color:var(--muted)}
+.cell .flag{color:#d98a7a;font-size:.62rem}
+.sec-t{font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.7rem}
+.sec-b{font-size:.88rem;line-height:1.95}
+.verdict{font-size:1.02rem;color:var(--gold-light);line-height:1.8;font-family:'Noto Serif SC',serif}
+.foot{text-align:center;font-size:.65rem;color:var(--muted);padding:1rem 1.5rem;line-height:1.9}
+.pay-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center}
+.pay-overlay.show{display:flex}
+.pay-box{background:#1a1a2e;border:1px solid #c4922a;border-radius:16px;padding:24px 20px;text-align:center;max-width:320px;width:90%;position:relative}
+.pay-close{position:absolute;top:12px;right:16px;color:#888;font-size:20px;cursor:pointer}
+.pay-title{color:#c4922a;font-size:18px;font-weight:600;margin-bottom:4px}
+.pay-sub{color:#888;font-size:12px;margin-bottom:16px}
+.pay-qr{width:200px;border-radius:8px;margin:0 auto 12px;display:block}
+.pay-tip{color:#aaa;font-size:12px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>奇 门</h1>
+    <p>AI · 奇门遁甲解盘</p>
+    <p style="margin-top:.8rem;font-size:.75rem"><a href="./" style="color:var(--gold);text-decoration:none">← 八字深解</a></p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <div class="label">所问之事（一件事，写清楚）</div>
+      <textarea class="input" id="question" maxlength="200" placeholder="例如：下周三的面试能否通过？"></textarea>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <div class="label">起局时间（默认为现在；问事请用提问的时刻）</div>
+      <input class="input" id="when" type="datetime-local">
+    </div>
+  </div>
+
+  <div class="err" id="err"></div>
+  <button class="btn" id="go" onclick="submitQimen()">✦ &nbsp;起局解盘</button>
+  <div class="note">每次解盘 ¥19.9，付款后自动开始<br>时间以你手机本地时间为准（按北京时间起局）</div>
+
+  <div id="loading">正在起局推演…<br><span style="font-size:.7rem;color:var(--muted)">通常需要 20–40 秒，请勿关闭页面</span></div>
+
+  <div id="result">
+    <div class="card">
+      <div class="sec-t">奇门盘</div>
+      <div class="meta" id="meta"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="card"><div class="sec-t">结论</div><div class="verdict" id="r-verdict"></div></div>
+    <div class="card"><div class="sec-t">盘面分析</div><div class="sec-b" id="r-analysis"></div></div>
+    <div class="card"><div class="sec-t">方位与时机</div><div class="sec-b" id="r-direction"></div></div>
+    <div class="card"><div class="sec-t">行动建议</div><div class="sec-b" id="r-advice"></div></div>
+  </div>
+
+  <div class="foot">奇门 · AI 解盘<br>解读依据传统奇门遁甲，仅供娱乐参考，请理性看待</div>
+</div>
+
+<div class="pay-overlay" id="payOverlay">
+  <div class="pay-box">
+    <span class="pay-close" onclick="closePay()">✕</span>
+    <div class="pay-title" id="payTitle"></div>
+    <div class="pay-sub" id="paySub"></div>
+    <img class="pay-qr" id="payQr" alt="" style="width:240px;height:240px;display:none">
+    <div class="pay-tip" id="payTip"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://api.yizhige.top';
+const QR_BASE = 'https://wenshehui26-dev.github.io/bazi/';
+
+function getUserId() {
+  let uid = localStorage.getItem('yzg_uid');
+  if (!uid) {
+    uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('yzg_uid', uid);
+  }
+  return uid;
+}
+
+// 默认起局时间 = 现在
+(function(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('when').value =
+    d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+})();
+
+function showErr(m){ const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; setTimeout(()=>e.style.display='none',8000); }
+
+const ORDER = ['4','9','2','3','5','7','8','1','6'];
+
+function renderPlate(pl) {
+  const meta = document.getElementById('meta');
+  meta.innerHTML = '';
+  const add = (k, v) => { if(!v) return; const s=document.createElement('span'); s.textContent=k+' '; const b=document.createElement('b'); b.textContent=v; s.appendChild(b); meta.appendChild(s); };
+  const z = pl.si_zhu || {};
+  add('四柱', [z.year,z.month,z.day,z.hour].filter(Boolean).join(' '));
+  if (pl.ju) add('局', (pl.ju.type||'')+(pl.ju.number||'')+'局 '+(pl.ju.yuan||''));
+  if (pl.zhi_fu) add('值符', (pl.zhi_fu.star||'')+'落'+(pl.zhi_fu.palace||'')+'宫');
+  if (pl.zhi_shi) add('值使', (pl.zhi_shi.gate||'')+'落'+(pl.zhi_shi.palace||'')+'宫');
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  ORDER.forEach(k => {
+    const p = (pl.palaces || {})[k] || {};
+    const c = document.createElement('div'); c.className = 'cell';
+    const line = (cls, txt) => { if(!txt) return; const d=document.createElement('div'); d.className=cls; d.textContent=txt; c.appendChild(d); };
+    line('pn', (p.name || (k+'宫')) + (p.direction ? ' · '+p.direction : ''));
+    line('dei', p.deity);
+    line('star', p.star);
+    line('gate', p.gate);
+    line('gan', (p.tian_gan||'') + (p.di_gan ? ' / '+p.di_gan : ''));
+    line('flag', (p.flags||[]).map(f => ({kong_wang:'空亡',yi_ma:'驿马',ji_xing:'击刑',geng:'庚',rumu_gan:'干入墓',rumu_star:'星入墓',rumu_gate:'门入墓',men_po:'门迫',pozhi:'迫制',star_fan_yin:'星反吟',gate_fan_yin:'门反吟',star_fu_yin:'星伏吟',gate_fu_yin:'门伏吟',gan_fan_yin:'干反吟',gan_fu_yin:'干伏吟'}[f]||f)).join(' '));
+    grid.appendChild(c);
+  });
+}
+
+async function submitQimen() {
+  const question = document.getElementById('question').value.trim();
+  const when = document.getElementById('when').value;
+  if (!question) { showErr('请先写下你要问的事'); return; }
+  if (!when) { showErr('请选择起局时间'); return; }
+  const t = when.replace('T', ' ').slice(0, 16);
+
+  const btn = document.getElementById('go');
+  btn.disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('err').style.display = 'none';
+
+  try {
+    const r = await fetch(API + '/qimen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: getUserId(), t, question })
+    });
+    const d = await r.json().catch(() => ({}));
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+
+    if (r.status === 403 && d.error === 'limit_reached') { openPay('qimen'); return; }
+    if (!r.ok || !d.ok) { showErr('解盘失败，本次次数已自动退还，请稍后重试' + (d.detail ? '（' + d.detail + '）' : '')); return; }
+
+    renderPlate(d.plate || {});
+    const rd = d.reading || {};
+    document.getElementById('r-verdict').textContent = rd.verdict || '—';
+    document.getElementById('r-analysis').textContent = rd.analysis || '—';
+    document.getElementById('r-direction').textContent = rd.direction || '—';
+    document.getElementById('r-advice').textContent = rd.advice || '—';
+    const res = document.getElementById('result');
+    res.style.display = 'block';
+    res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+    showErr('网络错误，请重试');
+  }
+}
+
+// ── 付款弹窗 ──
+const PAY_QR = { qimen: 'qr_1990.png' };
+let _payPoll = null, _payTick = null, _payToken = 0;
+function _payStop(){ clearInterval(_payPoll); clearInterval(_payTick); _payPoll = _payTick = null; }
+function closePay(){ _payToken++; _payStop(); document.getElementById('payOverlay').classList.remove('show'); }
+function _payShow(title, sub, tip, qr){
+  document.getElementById('payTitle').textContent = title;
+  document.getElementById('paySub').textContent = sub || '';
+  document.getElementById('payTip').textContent = tip || '';
+  const img = document.getElementById('payQr');
+  if (qr) { img.src = QR_BASE + qr; img.style.display = 'block'; } else { img.style.display = 'none'; }
+}
+async function openPay(product){
+  _payStop();
+  const token = ++_payToken;
+  document.getElementById('payOverlay').classList.add('show');
+  _payShow('正在生成订单…', '', '', null);
+  let r, d;
+  try {
+    r = await fetch(API + '/create-order', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userId: getUserId(), product }) });
+    d = await r.json().catch(() => ({}));
+  } catch (e) { if (token !== _payToken) return; _payShow('网络错误', '', '请关闭后重试', null); return; }
+  if (token !== _payToken) return;
+  if (r.status === 409) { _payShow('当前有人在付款', '', '请 ' + (d.retry_after || 30) + ' 秒后重试', null); return; }
+  if (!r.ok) { _payShow('下单失败', '', String(d.error || r.status), null); return; }
+
+  const orderId = d.orderId, expiresAt = d.expires_at;
+  _payShow('请支付 ¥' + (d.amount_cents/100).toFixed(2), '', '请按此金额准确支付，到账后自动继续，请勿关闭页面', PAY_QR[product]);
+  const tick = () => {
+    const left = Math.max(0, Math.floor((expiresAt - Date.now())/1000));
+    document.getElementById('paySub').textContent = '10 分钟内有效 · 剩余 ' + String(Math.floor(left/60)).padStart(2,'0') + ':' + String(left%60).padStart(2,'0');
+  };
+  tick(); _payTick = setInterval(tick, 1000);
+  _payPoll = setInterval(async () => {
+    try {
+      const sr = await fetch(API + '/order-status?id=' + encodeURIComponent(orderId));
+      const sd = await sr.json();
+      if (token !== _payToken) return;
+      if (sd.status === 'paid') { closePay(); submitQimen(); }
+      else if (sd.status === 'expired') {
+        _payStop(); _payShow('订单已过期', '', '正在重新下单…', null);
+        setTimeout(() => { if (token === _payToken) openPay(product); }, 1500);
+      }
+    } catch (_) {}
+  }, 3000);
+}
+</script>
+</body>
+</html>
