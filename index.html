@@ -461,6 +461,7 @@ html,body{
     <p class="hero-sub">AI · 八字深解</p>
     <div class="hero-line"><span>依据传统命理 · Claude 深度解读</span></div>
     <p class="hero-desc">输入生辰信息，AI结合四柱八字理论<br>为你揭示命运格局与人生密码</p>
+    <p style="margin-top:1rem;font-size:.78rem"><a href="qimen.html" style="color:var(--gold);text-decoration:none;border:.5px solid var(--border2);border-radius:20px;padding:.35rem 1rem;display:inline-block">奇门遁甲 · AI解盘 →</a></p>
   </div>
 
   <!-- API KEY -->
@@ -840,6 +841,7 @@ let _basicGrant = null, _deepGrant = null;
 async function _takeBasic(){
   const r = await fetch('https://api.yizhige.top/use-bazi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:getUserId()})});
   if (r.status === 403) return null;
+  if (r.status === 429) throw new Error('quota');
   if (!r.ok) throw new Error('http ' + r.status);
   const d = await r.json();
   return d.grant || null;
@@ -866,7 +868,7 @@ await fetch('https://api.yizhige.top/check-usage', {
   if (!year || !month || !day) { showErr('请填写完整的出生年月日'); return; }
 
   let g;
-  try { g = await _takeBasic(); } catch(e) { showErr('网络错误，请重试'); return; }
+  try { g = await _takeBasic(); } catch(e) { showErr(e.message === 'quota' ? '今天的免费名额已用完，请明天再来' : '网络错误，请重试'); return; }
   if (!g) { openPay('bazi_basic'); return; }
   _basicGrant = g;
 
