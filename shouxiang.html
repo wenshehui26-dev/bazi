@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>掌纹 · AI手相解读</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--gold:#C4922A;--gold-light:#E2C06A;--ink:#080810;--card:#13131E;--card2:#1A1A28;--border:rgba(196,146,42,0.18);--border2:rgba(196,146,42,0.4);--text:#EAE4D8;--muted:#8a847c}
+html,body{background:var(--ink);color:var(--text);font-family:-apple-system,'PingFang SC','Noto Sans SC',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:500px;margin:0 auto;padding:0 0 4rem}
+.tabs{display:flex;gap:.5rem;padding:.9rem 1.25rem 0;justify-content:center}
+.tabs a{padding:.45rem 1.1rem;border:.5px solid var(--border);border-radius:20px;color:var(--muted);font-size:.8rem;text-decoration:none}
+.tabs a.on{color:var(--gold-light);border-color:var(--border2);background:rgba(196,146,42,.1)}
+.hero{text-align:center;padding:1.8rem 1.5rem 1.2rem}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2rem;font-weight:300;color:var(--gold-light);letter-spacing:.18em;margin-bottom:.4rem}
+.hero p{font-size:.78rem;color:var(--muted);letter-spacing:.2em}
+.card{margin:0 1.25rem 1rem;background:var(--card);border:.5px solid var(--border);border-radius:16px;padding:1.25rem}
+.label{font-size:.72rem;color:var(--muted);margin-bottom:.6rem}
+.hand-row{display:flex;gap:.75rem;margin-bottom:1rem}
+.hand-btn{flex:1;padding:.65rem;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.12);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center;cursor:pointer}
+.hand-btn.on{background:rgba(196,146,42,.1);border-color:var(--border2);color:var(--gold-light)}
+.pick{display:block;text-align:center;padding:1.4rem 1rem;border:1px dashed var(--border2);border-radius:12px;color:var(--gold-light);font-size:.9rem;cursor:pointer}
+#preview{display:none;width:100%;max-height:320px;object-fit:contain;border-radius:10px;margin-top:.9rem}
+.tip{font-size:.7rem;color:var(--muted);line-height:1.8;margin-top:.8rem}
+.btn{width:calc(100% - 2.5rem);margin:0 1.25rem 1rem;padding:1rem;background:linear-gradient(135deg,rgba(196,146,42,.22),rgba(196,146,42,.08));border:.5px solid rgba(196,146,42,.45);border-radius:12px;color:var(--gold-light);font-size:1rem;letter-spacing:.15em;cursor:pointer}
+.btn:disabled{opacity:.4}
+.err{margin:0 1.25rem 1rem;background:rgba(196,80,58,.08);border:.5px solid rgba(196,80,58,.3);border-radius:10px;padding:.9rem 1rem;font-size:.8rem;color:#F09080;display:none;line-height:1.7}
+#loading{display:none;text-align:center;padding:2.5rem 1.5rem;color:var(--gold-light)}
+#result{display:none}
+.sec-t{font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.7rem}
+.sec-b{font-size:.88rem;line-height:1.95;white-space:pre-wrap}
+.verdict{font-size:1.02rem;color:var(--gold-light);line-height:1.8;font-family:'Noto Serif SC',serif}
+.foot{text-align:center;font-size:.65rem;color:var(--muted);padding:1rem 1.5rem;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tabs">
+    <a href="./">命局</a>
+    <a href="shouxiang.html" class="on">掌纹</a>
+    <a href="qimen.html">奇门</a>
+  </div>
+
+  <div class="hero">
+    <h1>掌 纹</h1>
+    <p>AI · 手相解读</p>
+  </div>
+
+  <div class="card">
+    <div class="label">选择要看的手</div>
+    <div class="hand-row">
+      <div class="hand-btn on" id="h-left" onclick="setHand('左手')">左手</div>
+      <div class="hand-btn" id="h-right" onclick="setHand('右手')">右手</div>
+    </div>
+    <label class="pick" for="file">📷 拍照或选择手掌照片</label>
+    <input type="file" id="file" accept="image/*" style="display:none" onchange="onPick(this)">
+    <img id="preview" alt="">
+    <div class="tip">拍摄要点：手掌完全张开，掌心朝向镜头；光线充足，不要逆光；让三条主线（生命线、智慧线、感情线）都清晰可见。</div>
+  </div>
+
+  <div class="err" id="err"></div>
+  <button class="btn" id="go" onclick="readPalm()">✦ &nbsp;开始解读</button>
+  <div class="foot" style="padding-top:0">每位用户免费 1 次</div>
+
+  <div id="loading">正在细看掌纹…<br><span style="font-size:.7rem;color:var(--muted)">通常需要 15–30 秒，请勿关闭页面</span></div>
+
+  <div id="result">
+    <div class="card"><div class="sec-t">观察到的特征</div><div class="sec-b" id="r-features" style="color:var(--muted);font-size:.8rem"></div></div>
+    <div class="card"><div class="sec-t">总评</div><div class="verdict" id="r-verdict"></div></div>
+    <div class="card"><div class="sec-t">生命线</div><div class="sec-b" id="r-life"></div></div>
+    <div class="card"><div class="sec-t">智慧线</div><div class="sec-b" id="r-head"></div></div>
+    <div class="card"><div class="sec-t">感情线</div><div class="sec-b" id="r-heart"></div></div>
+    <div class="card"><div class="sec-t">事业与财运</div><div class="sec-b" id="r-career"></div></div>
+    <div class="card"><div class="sec-t">建议</div><div class="sec-b" id="r-advice"></div></div>
+  </div>
+
+  <div class="foot">掌纹 · AI 手相解读<br>解读依据传统手相学，仅供娱乐参考，请理性看待<br>照片仅用于本次解读，不会保存</div>
+</div>
+
+<script>
+const API = 'https://api.yizhige.top';
+let hand = '左手';
+let imgB64 = '';
+
+function getUserId() {
+  let uid = localStorage.getItem('yzg_uid');
+  if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('yzg_uid', uid); }
+  return uid;
+}
+function showErr(m){ const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; setTimeout(()=>e.style.display='none',9000); }
+function setHand(h){ hand=h; document.getElementById('h-left').className='hand-btn'+(h==='左手'?' on':''); document.getElementById('h-right').className='hand-btn'+(h==='右手'?' on':''); }
+
+// 选图后压缩到最长边 1024px 的 JPEG，控制上传体积
+function onPick(inp) {
+  const f = inp.files && inp.files[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = () => {
+    const max = 1024;
+    const k = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const dataUrl = c.toDataURL('image/jpeg', 0.82);
+    imgB64 = dataUrl.split(',')[1];
+    const pv = document.getElementById('preview');
+    pv.src = dataUrl; pv.style.display = 'block';
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { showErr('这张图片无法读取，请换一张'); };
+  img.src = url;
+}
+
+async function refund(g){ if(!g) return; try{ await fetch(API+'/refund-grant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({grant:g})}); }catch(e){} }
+
+const SYSTEM = '你是精通中国传统手相学的相师。依据照片中掌纹的实际形态作答，每条判断要引用你在图中看到的具体特征（线的长短、深浅、走向、分叉、岛纹等）。语气沉稳温和，不夸大、不恐吓、不做医疗或寿命断言。看不清的部分如实说明看不清，不要编造。';
+const PROMPT = (h) => '这是一张' + h + '手掌的照片。请先按固定词汇记录你在图中看到的特征（features），再严格依据 features 解读，同样的特征必须给出同样的结论，不要每次换说法。如果图中不是手掌或完全无法辨认，verdict 写“未识别到清晰的手掌，请重新拍摄”，其余字段留空。\n\n【features 固定格式】生命线:长度[长/中/短] 深浅[深/中/浅] 弧度[大/适中/平直]；智慧线:长度[长/中/短] 走向[上扬/平直/下垂]；感情线:终点[食指下/食指中指之间/中指下] 深浅[深/中/浅]；事业线:[明显/隐约/无]；其他:[有岛纹/有断裂/有分叉/无明显]。看不清的项写“看不清”。\n\n【输出格式】直接输出JSON，不要markdown代码块，字符串内部不要出现英文双引号（强调请用「」）：{"features":"按上面格式写","verdict":"总评一句话40字内","life":"生命线解读100字内","head":"智慧线解读100字内","heart":"感情线解读100字内","career":"事业与财运解读100字内","advice":"建议100字内"}';
+
+function parseReading(raw) {
+  let r;
+  try { r = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(_) {}
+  if (!r) { const m = raw.match(/\{[\s\S]*\}/); if (m) { try { r = JSON.parse(m[0]); } catch(_) { try { r = JSON.parse(m[0].replace(/\r?\n/g,'\\n')); } catch(_) {} } } }
+  if (!r) {
+    const keys = ['features','verdict','life','head','heart','career','advice'], out = {};
+    keys.forEach((k,i) => {
+      const nx = keys[i+1];
+      const re = new RegExp('"'+k+'"\\s*:\\s*"([\\s\\S]*?)"\\s*'+(nx?',\\s*"'+nx+'"':'\\}'));
+      const mm = raw.match(re); if (mm) out[k] = mm[1].replace(/\\n/g,'\n').replace(/\\"/g,'"');
+    });
+    if (out.verdict) r = out;
+  }
+  return r || { verdict: raw.trim().slice(0, 40), life: raw.trim() };
+}
+
+function renderReading(rd) {
+  document.getElementById('r-features').textContent = rd.features || '—';
+  document.getElementById('r-verdict').textContent = rd.verdict || '—';
+  document.getElementById('r-life').textContent = rd.life || '—';
+  document.getElementById('r-head').textContent = rd.head || '—';
+  document.getElementById('r-heart').textContent = rd.heart || '—';
+  document.getElementById('r-career').textContent = rd.career || '—';
+  document.getElementById('r-advice').textContent = rd.advice || '—';
+  const res = document.getElementById('result'); res.style.display = 'block';
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function sha256(str) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(d)).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+async function readPalm() {
+  if (!imgB64) { showErr('请先拍照或选择一张手掌照片'); return; }
+  const btn = document.getElementById('go');
+  document.getElementById('err').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+
+  // 同一张照片（同一只手）直接用已保存的结果：结果一致，也不再消耗次数
+  let cacheKey = '';
+  try {
+    cacheKey = 'palm:' + hand + ':' + await sha256(imgB64);
+    const hit = localStorage.getItem(cacheKey);
+    if (hit) { renderReading(JSON.parse(hit)); return; }
+  } catch (_) {}
+  btn.disabled = true;
+
+  let grant = null;
+  try {
+    const r = await fetch(API + '/use-shouxiang', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userId: getUserId() }) });
+    if (r.status === 403) { btn.disabled = false; showErr('你的 1 次免费解读已用完'); return; }
+    if (r.status === 429) { btn.disabled = false; showErr('今天的免费名额已用完，请明天再来'); return; }
+    if (!r.ok) throw new Error('http ' + r.status);
+    grant = (await r.json()).grant;
+  } catch (e) { btn.disabled = false; showErr('网络错误，请重试'); return; }
+
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const resp = await fetch(API + '/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'x-grant': grant || '' },
+      body: JSON.stringify({
+        max_tokens: 1500, temperature: 0, system: SYSTEM,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imgB64 } },
+          { type: 'text', text: PROMPT(hand) }
+        ] }]
+      })
+    });
+    if (!resp.ok) throw new Error('claude ' + resp.status);
+    const data = await resp.json();
+    const raw = (data.content || []).find(b => b.type === 'text')?.text || '';
+    if (!raw.trim()) throw new Error('empty');
+    const rd = parseReading(raw);
+    document.getElementById('loading').style.display = 'none';
+    try { if (cacheKey && rd.verdict && rd.life) localStorage.setItem(cacheKey, JSON.stringify(rd)); } catch (_) {}
+    renderReading(rd);
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    await refund(grant);
+    showErr('解读失败，本次次数已退还，请稍后重试（' + e.message + '）');
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>

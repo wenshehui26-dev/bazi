@@ -447,12 +447,20 @@ html,body{
 .pay-qr{width:200px;border-radius:8px;margin:0 auto 12px;display:block}
 .pay-tip{color:#aaa;font-size:12px;line-height:1.6}
 .pay-tip b{color:#c4922a}
+.tabs{display:flex;gap:.5rem;padding:.9rem 1.25rem 0;justify-content:center;position:relative;z-index:2}
+.tabs a{padding:.45rem 1.1rem;border:.5px solid var(--border);border-radius:20px;color:var(--muted);font-size:.8rem;text-decoration:none}
+.tabs a.on{color:var(--gold-light);border-color:var(--border2);background:rgba(196,146,42,.1)}
 </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="bg-grid"></div>
 <div class="wrap">
+  <div class="tabs">
+    <a href="./" class="on">命局</a>
+    <a href="shouxiang.html">掌纹</a>
+    <a href="qimen.html">奇门</a>
+  </div>
 
   <!-- HERO -->
   <div class="hero">
@@ -461,7 +469,6 @@ html,body{
     <p class="hero-sub">AI · 八字深解</p>
     <div class="hero-line"><span>依据传统命理 · Claude 深度解读</span></div>
     <p class="hero-desc">输入生辰信息，AI结合四柱八字理论<br>为你揭示命运格局与人生密码</p>
-    <p style="margin-top:1rem;font-size:.78rem"><a href="qimen.html" style="color:var(--gold);text-decoration:none;border:.5px solid var(--border2);border-radius:20px;padding:.35rem 1rem;display:inline-block">奇门遁甲 · AI解盘 →</a></p>
   </div>
 
   <!-- API KEY -->

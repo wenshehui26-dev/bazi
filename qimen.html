@@ -46,14 +46,21 @@ textarea.input{resize:none;height:84px;line-height:1.6}
 .pay-sub{color:#888;font-size:12px;margin-bottom:16px}
 .pay-qr{width:200px;border-radius:8px;margin:0 auto 12px;display:block}
 .pay-tip{color:#aaa;font-size:12px;line-height:1.6}
+.tabs{display:flex;gap:.5rem;padding:.9rem 1.25rem 0;justify-content:center;position:relative;z-index:2}
+.tabs a{padding:.45rem 1.1rem;border:.5px solid var(--border);border-radius:20px;color:var(--muted);font-size:.8rem;text-decoration:none}
+.tabs a.on{color:var(--gold-light);border-color:var(--border2);background:rgba(196,146,42,.1)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="tabs">
+    <a href="./">命局</a>
+    <a href="shouxiang.html">掌纹</a>
+    <a href="qimen.html" class="on">奇门</a>
+  </div>
   <div class="hero">
     <h1>奇 门</h1>
     <p>AI · 奇门遁甲解盘</p>
-    <p style="margin-top:.8rem;font-size:.75rem"><a href="./" style="color:var(--gold);text-decoration:none">← 八字深解</a></p>
   </div>
 
   <div class="card">
