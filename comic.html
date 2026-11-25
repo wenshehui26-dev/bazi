@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>人生漫画 · 易知阁</title>
+<style>
+:root{--gold:#C4922A;--gold-light:#E2C06A;--ink:#080810;--card:#13131E;--card2:#1A1A28;--border:rgba(196,146,42,0.18);--border2:rgba(196,146,42,0.4);--text:#EAE4D8;--muted:#8A8478;--red:#C4503A}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--ink);color:var(--text);font-family:'Noto Sans SC','PingFang SC',sans-serif;font-weight:300;min-height:100vh}
+.wrap{max-width:500px;margin:0 auto;padding:0 1rem 5rem}
+.nav{display:flex;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(8,8,16,.95);z-index:10;max-width:500px;margin:0 auto}
+.nav a{flex:1;text-align:center;padding:.85rem 0;color:var(--muted);text-decoration:none;font-size:.9rem;letter-spacing:.2em}
+.nav a.on{color:var(--gold-light);border-bottom:2px solid var(--gold)}
+h1{font-family:'Noto Serif SC',serif;font-weight:300;color:var(--gold-light);text-align:center;font-size:1.8rem;letter-spacing:.18em;margin:2rem 0 .3rem}
+.sub{text-align:center;color:var(--muted);font-size:.75rem;letter-spacing:.2em;margin-bottom:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;margin-bottom:1rem}
+label{display:block;font-size:.8rem;color:var(--muted);margin:.8rem 0 .35rem}
+input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:.7rem .8rem;font-size:1rem;color-scheme:dark}
+.seg{display:flex;gap:.6rem}
+.seg button{flex:1;padding:.65rem;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-size:.95rem}
+.seg button.on{border-color:var(--gold);color:var(--gold-light)}
+.chk{display:flex;align-items:center;gap:.4rem;margin-top:.5rem}
+.chk input{width:auto}
+.btn{width:100%;margin-top:1.2rem;padding:.9rem;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#1a1206;font-size:1rem;font-weight:500;letter-spacing:.2em}
+.btn:disabled{opacity:.5}
+.msg{text-align:center;color:var(--muted);font-size:.85rem;margin:1rem 0;min-height:1.2em}
+.msg.err{color:var(--red)}
+.title{font-family:'Noto Serif SC',serif;font-size:1.5rem;color:var(--gold-light);text-align:center;margin:1.5rem 0 .3rem}
+.tagline{text-align:center;font-size:.9rem;margin-bottom:1.2rem}
+.warn{color:var(--red);font-size:.8rem;text-align:center;margin-bottom:1rem}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem}
+.pic{position:relative;aspect-ratio:4/3;display:flex;align-items:flex-end;padding:.8rem}
+.pic .age{position:absolute;top:.7rem;left:.7rem;background:rgba(8,8,16,.7);color:var(--gold-light);border:1px solid var(--border2);border-radius:999px;padding:.15rem .6rem;font-size:.8rem}
+.pic .bubbles{position:absolute;top:2.8rem;right:.7rem;left:28%;display:flex;flex-direction:column;gap:.45rem;align-items:flex-end}
+.bubble{background:#fff;color:#111;border-radius:12px;padding:.4rem .65rem;font-size:.85rem;line-height:1.4}
+.bubble b{font-weight:500;color:#7a5a12;margin-right:.3rem}
+.pic .lab{font-size:.72rem;color:rgba(255,255,255,.8);background:rgba(0,0,0,.35);padding:.25rem .5rem;border-radius:6px;line-height:1.5}
+.narr{padding:.9rem 1rem .4rem;font-size:.95rem;line-height:1.8}
+.meta{padding:0 1rem .9rem;font-size:.72rem;color:var(--muted)}
+.ending{text-align:center;font-family:'Noto Serif SC',serif;color:var(--gold-light);line-height:1.9;margin:1.5rem 0}
+details{font-size:.75rem;color:var(--muted);margin-top:1rem}
+details pre{white-space:pre-wrap;word-break:break-all;margin-top:.5rem}
+</style>
+</head>
+<body>
+<nav class="nav"><a href="index.html">命局</a><a href="shouxiang.html">掌纹</a><a href="qimen.html">奇门</a><a class="on" href="comic.html">漫画</a></nav>
+<div class="wrap">
+  <h1>人生漫画</h1>
+  <div class="sub">原型测试 · 画面暂用占位</div>
+  <div class="card">
+    <label for="name">称呼（可选）</label>
+    <input id="name" maxlength="12" placeholder="不填就用「你」">
+    <label>性别</label>
+    <div class="seg" id="sex"><button type="button" data-v="1" class="on">男</button><button type="button" data-v="0">女</button></div>
+    <label for="date">出生日期（公历）</label>
+    <input id="date" type="date" min="1901-01-01" max="2099-12-31">
+    <label for="time">出生时间（北京时间）</label>
+    <input id="time" type="time" value="12:00">
+    <label class="chk"><input id="unk" type="checkbox">不知道出生时间</label>
+    <label for="key">测试口令</label>
+    <input id="key" type="password" autocomplete="off" placeholder="只保存在这台设备的浏览器里">
+    <button class="btn" id="go" type="button">生成我的人生漫画</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div id="out"></div>
+</div>
+<script>
+const API = 'https://api.yizhige.top';
+const SCENES = {home:'家中',countryside:'乡下老家',classroom:'教室',playground:'操场',dorm:'宿舍',train_station:'车站离乡',city_street:'城市街头',office:'办公室',night_desk:'深夜书桌',rooftop:'天台',cafe:'咖啡馆',hospital_corridor:'医院走廊',family_dinner:'家宴',new_home:'新家',seaside:'海边',mountain_top:'山顶',shop:'小店',stage:'舞台'};
+const MOODS = {happy:'开心',calm:'平静',sad:'难过',lonely:'孤独',angry:'生气',determined:'坚定',surprised:'惊讶',tender:'温柔'};
+const MOOD_BG = {happy:['#5a3d12','#c4922a'],calm:['#1d2a3a','#3d5a73'],sad:['#1a1f2e','#3b4660'],lonely:['#14141f','#33334d'],angry:['#3a1212','#8a2e22'],determined:['#2a1f0a','#8a6a1f'],surprised:['#2a1a3a','#6a3d8a'],tender:['#3a1f2a','#8a4a5f']};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sex = 1;
+
+document.querySelectorAll('#sex button').forEach((b) => {
+  b.onclick = () => { sex = +b.dataset.v; document.querySelectorAll('#sex button').forEach((x) => x.classList.toggle('on', x === b)); };
+});
+$('key').value = localStorage.getItem('comic_admin_key') || '';
+$('unk').onchange = () => { $('time').disabled = $('unk').checked; };
+
+function msg(t, err) { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); }
+
+$('go').onclick = async () => {
+  const d = $('date').value;
+  if (!d) { msg('请先选出生日期', 1); return; }
+  const key = $('key').value.trim();
+  if (!key) { msg('请填测试口令', 1); return; }
+  localStorage.setItem('comic_admin_key', key);
+  const [y, m, dd] = d.split('-').map(Number);
+  const unk = $('unk').checked;
+  const [hh, mi] = (unk ? '12:00' : ($('time').value || '12:00')).split(':').map(Number);
+  const body = { name: $('name').value.trim(), sex, year: y, month: m, day: dd, hours: hh, minute: mi, hour_unknown: unk };
+  $('go').disabled = true; $('out').innerHTML = ''; msg('正在写你的故事……大约 30–60 秒');
+  try {
+    const r = await fetch(API + '/comic', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) { msg(r.status === 401 ? '测试口令不对' : '生成失败：' + (j.detail || j.error || r.status), 1); return; }
+    msg(''); render(j);
+  } catch (e) {
+    msg('网络错误：' + e.message, 1);
+  } finally {
+    $('go').disabled = false;
+  }
+};
+
+function render(j) {
+  const c = j.comic;
+  let h = '<div class="title">' + esc(c.title) + '</div><div class="tagline">' + esc(c.tagline) + '</div>';
+  if (j.term_hits && j.term_hits.length) h += '<div class="warn">仍检测到术语：' + esc(j.term_hits.join('、')) + '</div>';
+  c.panels.forEach((p) => {
+    const bg = MOOD_BG[p.mood] || MOOD_BG.calm;
+    const bubbles = (p.dialogue || []).map((d) => '<div class="bubble">' + (d.who ? '<b>' + esc(d.who) + '</b>' : '') + esc(d.text) + '</div>').join('');
+    h += '<div class="panel"><div class="pic" style="background:linear-gradient(160deg,' + bg[0] + ',' + bg[1] + ')">' +
+      '<span class="age">' + (p.age != null ? esc(p.age) + '岁' : '') + (p.stage ? ' · ' + esc(p.stage) : '') + '</span>' +
+      '<div class="bubbles">' + bubbles + '</div>' +
+      '<span class="lab">占位｜' + esc(SCENES[p.scene_key] || p.scene_key) + ' · ' + esc(MOODS[p.mood] || p.mood) + '｜' + esc(p.scene) + '</span>' +
+      '</div><div class="narr">' + esc(p.narration) + '</div>' +
+      '<div class="meta">动作：' + esc(p.action) + '　表情：' + esc(p.expression) + '</div></div>';
+  });
+  h += '<div class="ending">' + esc(c.ending) + '</div>';
+  h += '<details><summary>调试信息（原型）</summary><pre>' + esc(JSON.stringify(j.debug, null, 2)) + '</pre></details>';
+  $('out').innerHTML = h;
+}
+</script>
+</body>
+</html>
