@@ -1,236 +1,148 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>人生漫画 · 易知阁</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人生漫画（原型）</title>
 <style>
-:root{--gold:#C4922A;--gold-light:#E2C06A;--ink:#080810;--card:#13131E;--card2:#1A1A28;--border:rgba(196,146,42,0.18);--border2:rgba(196,146,42,0.4);--text:#EAE4D8;--muted:#8A8478;--red:#C4503A}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--ink);color:var(--text);font-family:'Noto Sans SC','PingFang SC',sans-serif;font-weight:300;min-height:100vh}
-.wrap{max-width:500px;margin:0 auto;padding:0 1rem 5rem}
-.nav{display:flex;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--ink);z-index:10;max-width:500px;margin:0 auto}
-.nav a{flex:1;text-align:center;padding:.85rem 0;color:var(--muted);text-decoration:none;font-size:.9rem;letter-spacing:.2em}
-.nav a.on{color:var(--gold-light);border-bottom:2px solid var(--gold)}
-h1{font-family:'Noto Serif SC',serif;font-weight:300;color:var(--gold-light);text-align:center;font-size:1.8rem;letter-spacing:.18em;margin:2rem 0 .3rem}
-.sub{text-align:center;color:var(--muted);font-size:.75rem;letter-spacing:.2em;margin-bottom:1.5rem}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;margin-bottom:1rem}
-label{display:block;font-size:.8rem;color:var(--muted);margin:.8rem 0 .35rem}
-input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:.7rem .8rem;font-size:1rem;font-family:inherit;color-scheme:dark}
-.seg{display:flex;gap:.6rem}
-.seg button{flex:1;padding:.65rem;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-size:.95rem}
-.seg button.on{border-color:var(--gold);color:var(--gold-light)}
-.seg button:disabled{opacity:.45}
-.chk{display:flex;align-items:flex-start;gap:.45rem;margin-top:.6rem;line-height:1.5}
-.chk input{width:auto;margin-top:.2rem}
-.sec{margin-top:1.3rem;padding-top:1rem;border-top:1px dashed var(--border);font-size:.85rem;color:var(--gold-light)}
-.hint{font-size:.72rem;color:var(--muted);margin-top:.25rem}
-.ev{display:flex;gap:.5rem;margin-bottom:.5rem}.ev input:first-child{width:5.2rem;flex:none}
-.btn{width:100%;margin-top:1.2rem;padding:.9rem;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#1a1206;font-size:1rem;font-weight:500;letter-spacing:.2em}
-.btn:disabled{opacity:.5}
-.msg{text-align:center;color:var(--muted);font-size:.85rem;margin:1rem 0;min-height:1.2em}
-.msg.err{color:var(--red)}
-.title{font-family:'Noto Serif SC',serif;font-size:1.5rem;color:var(--gold-light);text-align:center;margin:1.5rem 0 .3rem}
-.tagline{text-align:center;font-size:.9rem;margin-bottom:1.2rem}
-.warn{color:var(--red);font-size:.8rem;text-align:center;margin-bottom:1rem}
-.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem}
-.pic{position:relative;aspect-ratio:4/3;display:flex;align-items:flex-end;padding:.8rem}
-.pic .age{position:absolute;top:.7rem;left:.7rem;background:rgba(8,8,16,.7);color:var(--gold-light);border:1px solid var(--border2);border-radius:999px;padding:.15rem .6rem;font-size:.8rem}
-.pic .bubbles{position:absolute;top:2.8rem;right:.7rem;left:28%;display:flex;flex-direction:column;gap:.45rem;align-items:flex-end}
-.bubble{background:#fff;color:#111;border-radius:12px;padding:.4rem .65rem;font-size:.85rem;line-height:1.4}
-.bubble b{font-weight:500;color:#7a5a12;margin-right:.3rem}
-.pic .lab{font-size:.72rem;color:rgba(255,255,255,.8);background:rgba(0,0,0,.35);padding:.25rem .5rem;border-radius:6px;line-height:1.5}
-.narr{padding:.9rem 1rem .4rem;font-size:.95rem;line-height:1.8}
-.meta{padding:0 1rem .9rem;font-size:.72rem;color:var(--muted)}
-.ending{text-align:center;font-family:'Noto Serif SC',serif;color:var(--gold-light);line-height:1.9;margin:1.5rem 0}
-.tabs{display:flex;gap:.6rem;margin:1.2rem 0 .4rem;position:sticky;top:3rem;z-index:5;background:var(--ink);padding:.4rem 0}
-.tabs button{flex:1;padding:.7rem;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-size:.95rem}
-.tabs button.on{border-color:var(--gold);color:var(--gold-light)}
-.reveal{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:1rem;margin-top:1rem;line-height:1.9;font-size:.9rem}
-.reveal b{color:var(--gold-light);font-weight:500}
-.link{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:.75rem;margin-top:.4rem}
-details{font-size:.75rem;color:var(--muted);margin-top:1rem}
-details pre{white-space:pre-wrap;word-break:break-all;margin-top:.5rem}
+:root{--ink:#1c2430;--paper:#eef1f5;--card:#fff;--hi:#e9b72f;--line:#c9d0da;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 "PingFang SC","Noto Sans SC",system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 16px 64px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:.04em}
+.sub{margin:0 0 22px;color:#5b6675;font-size:14px}
+form{background:var(--card);border:3px solid var(--ink);padding:18px;display:grid;gap:14px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:10px}
+legend{font-weight:700;padding:0;margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+label{display:grid;gap:4px;font-size:13px;color:#5b6675;flex:1 1 120px}
+input,select{font:inherit;color:var(--ink);padding:8px 10px;border:2px solid var(--line);background:#fff;border-radius:0;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--hi);outline-offset:1px}
+.ev{display:grid;grid-template-columns:90px 1fr;gap:10px}
+button{font:inherit;font-weight:700;background:var(--ink);color:#fff;border:0;padding:12px 18px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+#msg{min-height:1.7em;margin:14px 0 0;font-size:14px}
+#msg.err{color:#b3261e}
+h2{font-size:24px;margin:30px 0 2px}
+.tag{margin:0 0 18px;color:#5b6675}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.ev{grid-template-columns:80px 1fr}}
+.panel{background:var(--card);border:3px solid var(--ink);display:flex;flex-direction:column}
+.art{height:170px;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;border-bottom:3px solid var(--ink)}
+.art .cap{position:absolute;left:0;right:0;bottom:0;padding:5px 10px;background:rgba(28,36,48,.78);color:#fff;font-size:12px;line-height:1.4}
+.age{position:absolute;top:8px;left:8px;background:var(--hi);color:var(--ink);font-weight:700;font-size:13px;padding:2px 8px;border:2px solid var(--ink)}
+.body{padding:12px 14px 14px;display:grid;gap:10px}
+.nar{margin:0;font-family:"Songti SC","Noto Serif SC",serif;font-size:16px;line-height:1.85}
+.bub{margin:0;padding:6px 12px;border:2px solid var(--ink);border-radius:16px;background:#fff;font-size:14px;width:fit-content;max-width:100%}
+.bub b{font-weight:700;margin-right:6px}
+.end{margin-top:22px;padding:16px;border:3px solid var(--ink);background:var(--hi);font-family:"Songti SC","Noto Serif SC",serif;font-size:17px}
+.dbg{margin-top:18px;font-size:12px;color:#5b6675;word-break:break-all}
 </style>
 </head>
 <body>
-<nav class="nav"><a href="index.html">命局</a><a href="shouxiang.html">掌纹</a><a href="qimen.html">奇门</a><a class="on" href="comic.html">漫画</a></nav>
-<div class="wrap">
-  <h1>人生漫画</h1>
-  <div class="sub">原型测试 · 画面暂用占位</div>
-  <div class="card">
-    <label for="name">称呼（可选）</label>
-    <input id="name" maxlength="12" placeholder="不填就用「你」">
-    <label>性别</label>
-    <div class="seg" id="sex"><button type="button" data-v="1" class="on">男</button><button type="button" data-v="0">女</button></div>
-    <label for="date">出生日期（公历）</label>
-    <input id="date" type="date" min="1901-01-01" max="2099-12-31">
-    <label for="time">出生时间（北京时间）</label>
-    <input id="time" type="time" value="12:00">
-    <label class="chk"><input id="unk" type="checkbox">不知道出生时间</label>
-    <div class="sec">补充几句真实情况（选填，越具体越准）</div>
-    <div class="hint">只用来写故事，没填的部分不会编造经历</div>
-    <label for="job">现在在做什么</label>
-    <input id="job" maxlength="30" placeholder="比如：做外贸、开小店、写代码">
-    <label for="home">老家（小时候在哪长大）</label>
-    <input id="home" maxlength="24" placeholder="比如：湖南邵阳农村">
-    <label for="city">现在在哪</label>
-    <input id="city" maxlength="24" placeholder="比如：深圳">
-    <label for="rel">感情状态</label>
-    <select id="rel"><option value="">不想说</option><option>单身</option><option>恋爱中</option><option>已婚</option><option>离异</option><option>丧偶</option></select>
-    <label>经历过的大事（最多 3 件）</label>
-    <div class="ev"><input id="ey1" type="number" inputmode="numeric" placeholder="年份"><input id="et1" maxlength="50" placeholder="比如：辞职去外地创业"></div>
-    <div class="ev"><input id="ey2" type="number" inputmode="numeric" placeholder="年份"><input id="et2" maxlength="50" placeholder="比如：父亲生病，回老家"></div>
-    <div class="ev"><input id="ey3" type="number" inputmode="numeric" placeholder="年份"><input id="et3" maxlength="50" placeholder="比如：结婚"></div>
-    <label for="worry">现在最烦心的事</label>
-    <textarea id="worry" rows="2" maxlength="60" placeholder="一句话就行"></textarea>
-    <label class="chk"><input id="blind" type="checkbox">盲测：同时生成两份，一份用真实生日、一份用随机生日（补充信息相同），看你能不能认出自己</label>
-    <label for="key">测试口令</label>
-    <input id="key" type="password" autocomplete="off" placeholder="只保存在这台设备的浏览器里">
-    <button class="btn" id="go" type="button">生成我的人生漫画</button>
-  </div>
-  <div class="msg" id="msg"></div>
-  <div id="out"></div>
-</div>
+<main>
+<h1>人生漫画</h1>
+<p class="sub">原型：输入生日，生成 8 格人生分镜。画面为占位图。</p>
+
+<form id="f">
+  <fieldset>
+    <legend>出生信息</legend>
+    <div class="row">
+      <label>性别<select id="sex"><option value="1">男</option><option value="2">女</option></select></label>
+      <label>年<input id="y" type="number" min="1901" max="2099" placeholder="1990" required></label>
+      <label>月<input id="m" type="number" min="1" max="12" placeholder="5" required></label>
+      <label>日<input id="d" type="number" min="1" max="31" placeholder="12" required></label>
+      <label>时辰<select id="h">
+        <option value="x">不详</option>
+        <option value="0">子（23–1 点）</option><option value="2">丑（1–3 点）</option><option value="4">寅（3–5 点）</option>
+        <option value="6">卯（5–7 点）</option><option value="8">辰（7–9 点）</option><option value="10">巳（9–11 点）</option>
+        <option value="12">午（11–13 点）</option><option value="14">未（13–15 点）</option><option value="16">申（15–17 点）</option>
+        <option value="18">酉（17–19 点）</option><option value="20">戌（19–21 点）</option><option value="22">亥（21–23 点）</option>
+      </select></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>你的真实情况（选填，填得越多越像你）</legend>
+    <div class="row">
+      <label>称呼<input id="name" maxlength="12"></label>
+      <label>现在在做<input id="job" maxlength="30"></label>
+      <label>老家<input id="home" maxlength="24"></label>
+      <label>现居地<input id="city" maxlength="24"></label>
+      <label>感情状态<input id="rel" maxlength="10" placeholder="单身 / 已婚…"></label>
+    </div>
+    <label>现在最烦心的事<input id="worry" maxlength="60"></label>
+    <div class="ev"><input class="eY" type="number" placeholder="年份"><input class="eT" maxlength="50" placeholder="人生大事 1（一句话）"></div>
+    <div class="ev"><input class="eY" type="number" placeholder="年份"><input class="eT" maxlength="50" placeholder="人生大事 2"></div>
+    <div class="ev"><input class="eY" type="number" placeholder="年份"><input class="eT" maxlength="50" placeholder="人生大事 3"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>管理员密钥</legend>
+    <label>仅本次使用，不保存<input id="key" type="password" autocomplete="off" required></label>
+  </fieldset>
+
+  <button id="go" type="submit">生成漫画</button>
+</form>
+<p id="msg" role="status"></p>
+<section id="out"></section>
+</main>
+
 <script>
-const API = 'https://api.yizhige.top';
-const SCENES = {home:'家中',countryside:'乡下老家',classroom:'教室',playground:'操场',dorm:'宿舍',train_station:'车站离乡',city_street:'城市街头',office:'办公室',night_desk:'深夜书桌',rooftop:'天台',cafe:'咖啡馆',hospital_corridor:'医院走廊',family_dinner:'家宴',new_home:'新家',seaside:'海边',mountain_top:'山顶',shop:'小店',stage:'舞台'};
-const MOODS = {happy:'开心',calm:'平静',sad:'难过',lonely:'孤独',angry:'生气',determined:'坚定',surprised:'惊讶',tender:'温柔'};
-const MOOD_BG = {happy:['#5a3d12','#c4922a'],calm:['#1d2a3a','#3d5a73'],sad:['#1a1f2e','#3b4660'],lonely:['#14141f','#33334d'],angry:['#3a1212','#8a2e22'],determined:['#2a1f0a','#8a6a1f'],surprised:['#2a1a3a','#6a3d8a'],tender:['#3a1f2a','#8a4a5f']};
-const LOG_KEY = 'comic_blind_log';
+const API = 'https://api.yizhige.top/comic';
+const SCENE = {home:'🏠',countryside:'🌾',classroom:'🏫',playground:'🏃',dorm:'🛏️',train_station:'🚉',city_street:'🌆',office:'💼',night_desk:'💡',rooftop:'🌇',cafe:'☕',hospital_corridor:'🏥',family_dinner:'🍲',new_home:'🔑',seaside:'🌊',mountain_top:'⛰️',shop:'🏪',stage:'🎤'};
+const MOOD = {happy:'#f6dc8a',calm:'#cfe0e8',sad:'#b9c3d6',lonely:'#c9c4dc',angry:'#e8b4a8',determined:'#f0cfa0',surprised:'#f2e3a4',tender:'#f2cdd6'};
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pad = (n) => String(n).padStart(2, '0');
-let sex = 1;
-let blindState = null;
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
-document.querySelectorAll('#sex button').forEach((b) => {
-  b.onclick = () => { sex = +b.dataset.v; document.querySelectorAll('#sex button').forEach((x) => x.classList.toggle('on', x === b)); };
-});
-$('key').value = localStorage.getItem('comic_admin_key') || '';
-$('unk').onchange = () => { $('time').disabled = $('unk').checked; };
+function say(t, err) { const m = $('msg'); m.textContent = t; m.className = err ? 'err' : ''; }
 
-function msg(t, err) { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); }
-
-function collect() {
-  const d = $('date').value;
-  if (!d) return { err: '请先选出生日期' };
-  const key = $('key').value.trim();
-  if (!key) return { err: '请填测试口令' };
-  const [y, m, dd] = d.split('-').map(Number);
-  const unk = $('unk').checked;
-  const [hh, mi] = (unk ? '12:00' : ($('time').value || '12:00')).split(':').map(Number);
-  const events = [1, 2, 3].map((i) => ({ year: parseInt($('ey' + i).value, 10), text: $('et' + i).value.trim() })).filter((e) => e.text && e.year);
-  const facts = { job: $('job').value.trim(), hometown: $('home').value.trim(), city: $('city').value.trim(), relation: $('rel').value, events, worry: $('worry').value.trim() };
-  return { key, body: { name: $('name').value.trim(), sex, year: y, month: m, day: dd, hours: hh, minute: mi, hour_unknown: unk, facts } };
-}
-
-// 随机生日：同一年（年龄和阶段对得上），换一个月份
-function randomBirth(real) {
-  let m;
-  do { m = 1 + Math.floor(Math.random() * 12); } while (m === real.month);
-  const dim = new Date(Date.UTC(real.year, m, 0)).getUTCDate();
-  const d = 1 + Math.floor(Math.random() * dim);
-  return { ...real, month: m, day: d, hours: real.hour_unknown ? 12 : Math.floor(Math.random() * 24), minute: real.hour_unknown ? 0 : Math.floor(Math.random() * 60) };
-}
-
-async function callComic(body, key) {
-  const r = await fetch(API + '/comic', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || !j.ok) throw new Error(r.status === 401 ? '测试口令不对' : (j.detail || j.error || ('HTTP ' + r.status)));
-  return j;
-}
-
-$('go').onclick = async () => {
-  const c = collect();
-  if (c.err) { msg(c.err, 1); return; }
-  localStorage.setItem('comic_admin_key', c.key);
-  const blind = $('blind').checked;
-  $('go').disabled = true; $('out').innerHTML = ''; blindState = null;
-  msg(blind ? '正在同时写两份……大约 30–90 秒' : '正在写你的故事……大约 30–60 秒');
-  try {
-    if (!blind) {
-      const j = await callComic(c.body, c.key);
-      msg(''); renderComic($('out'), j, true);
-    } else {
-      const fake = randomBirth(c.body);
-      const [jr, jf] = await Promise.all([callComic(c.body, c.key), callComic(fake, c.key)]);
-      const realIsA = Math.random() < 0.5;
-      blindState = { A: realIsA ? jr : jf, B: realIsA ? jf : jr, realIsA, fake, picked: false };
-      msg(''); renderBlind();
+function render(data) {
+  const out = $('out'); out.replaceChildren();
+  const c = data.comic;
+  out.append(el('h2', '', c.title), el('p', 'tag', c.tagline));
+  const grid = el('div', 'grid');
+  for (const p of c.panels) {
+    const card = el('article', 'panel');
+    const art = el('div', 'art', SCENE[p.scene_key] || '🎞️');
+    art.style.background = MOOD[p.mood] || '#dde3ea';
+    art.append(el('span', 'age', (p.age != null ? p.age + ' 岁' : '') + (p.stage ? ' ' + p.stage : '')), el('div', 'cap', p.scene));
+    const body = el('div', 'body');
+    body.append(el('p', 'nar', p.narration));
+    for (const d of p.dialogue || []) {
+      const b = el('p', 'bub'); b.append(el('b', '', d.who || ''), document.createTextNode(d.text)); body.append(b);
     }
-  } catch (e) {
-    msg('生成失败：' + e.message, 1);
-  } finally {
-    $('go').disabled = false;
+    card.append(art, body); grid.append(card);
   }
-};
-
-function renderComic(el, j, showDebug) {
-  const c = j.comic;
-  let h = '<div class="title">' + esc(c.title) + '</div><div class="tagline">' + esc(c.tagline) + '</div>';
-  if (j.term_hits && j.term_hits.length) h += '<div class="warn">仍有问题：' + esc(j.term_hits.join('；')) + '</div>';
-  c.panels.forEach((p) => {
-    const bg = MOOD_BG[p.mood] || MOOD_BG.calm;
-    const bubbles = (p.dialogue || []).map((d) => '<div class="bubble">' + (d.who ? '<b>' + esc(d.who) + '</b>' : '') + esc(d.text) + '</div>').join('');
-    h += '<div class="panel"><div class="pic" style="background:linear-gradient(160deg,' + bg[0] + ',' + bg[1] + ')">' +
-      '<span class="age">' + (p.age != null ? esc(p.age) + '岁' : '') + (p.stage ? ' · ' + esc(p.stage) : '') + '</span>' +
-      '<div class="bubbles">' + bubbles + '</div>' +
-      '<span class="lab">占位｜' + esc(SCENES[p.scene_key] || p.scene_key) + ' · ' + esc(MOODS[p.mood] || p.mood) + '｜' + esc(p.scene) + '</span>' +
-      '</div><div class="narr">' + esc(p.narration) + '</div>' +
-      '<div class="meta">动作：' + esc(p.action) + ' 表情：' + esc(p.expression) + '</div></div>';
-  });
-  h += '<div class="ending">' + esc(c.ending) + '</div>';
-  if (showDebug) h += '<details><summary>调试信息（原型）</summary><pre>' + esc(JSON.stringify(j.debug, null, 2)) + '</pre></details>';
-  el.innerHTML = h;
+  out.append(grid, el('p', 'end', c.ending));
+  const dbg = data.debug || {};
+  out.append(el('p', 'dbg', '排盘：' + (dbg.bazi || []).join(' ') + '　起运：' + (dbg.qiyun || '') + '　用到的事实：' + (dbg.facts_used ?? 0) + ' 项　术语命中：' + ((data.term_hits || []).join('、') || '无')));
 }
 
-function renderBlind() {
-  $('out').innerHTML =
-    '<div class="tabs"><button type="button" id="tabA" class="on">A 版</button><button type="button" id="tabB">B 版</button></div>' +
-    '<div id="paneA"></div><div id="paneB" style="display:none"></div>' +
-    '<div class="card"><div class="tagline" style="margin-bottom:.8rem">两份都看完，哪份更像你？</div>' +
-    '<div class="seg"><button type="button" id="pickA">A 更像我</button><button type="button" id="pickB">B 更像我</button><button type="button" id="pickU">分不出</button></div></div>' +
-    '<div id="reveal"></div>';
-  renderComic($('paneA'), blindState.A, false);
-  renderComic($('paneB'), blindState.B, false);
-  const show = (w) => {
-    $('paneA').style.display = w === 'A' ? '' : 'none';
-    $('paneB').style.display = w === 'B' ? '' : 'none';
-    $('tabA').classList.toggle('on', w === 'A');
-    $('tabB').classList.toggle('on', w === 'B');
+$('f').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const hv = $('h').value;
+  const events = [...document.querySelectorAll('.ev')].map((r) => ({ year: parseInt(r.querySelector('.eY').value, 10), text: r.querySelector('.eT').value.trim() })).filter((e) => e.year && e.text);
+  const payload = {
+    year: +$('y').value, month: +$('m').value, day: +$('d').value, sex: +$('sex').value,
+    hours: hv === 'x' ? 12 : +hv, hour_unknown: hv === 'x',
+    name: $('name').value.trim(),
+    facts: { job: $('job').value.trim(), hometown: $('home').value.trim(), city: $('city').value.trim(), relation: $('rel').value.trim(), worry: $('worry').value.trim(), events },
   };
-  $('tabA').onclick = () => show('A');
-  $('tabB').onclick = () => show('B');
-  $('pickA').onclick = () => reveal('A');
-  $('pickB').onclick = () => reveal('B');
-  $('pickU').onclick = () => reveal('?');
-}
-
-function readLog() {
-  try { const a = JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (_) { return []; }
-}
-
-function reveal(choice) {
-  if (!blindState || blindState.picked) return;
-  blindState.picked = true;
-  const real = blindState.realIsA ? 'A' : 'B';
-  const result = choice === '?' ? 'unsure' : (choice === real ? 'hit' : 'miss');
-  const log = readLog();
-  log.push({ t: Date.now(), result });
-  localStorage.setItem(LOG_KEY, JSON.stringify(log));
-  const n = (r) => log.filter((x) => x.result === r).length;
-  const f = blindState.fake;
-  const fakeTxt = f.year + '-' + pad(f.month) + '-' + pad(f.day) + (f.hour_unknown ? '' : ' ' + pad(f.hours) + ':' + pad(f.minute));
-  const verdict = result === 'hit' ? '认出来了' : (result === 'miss' ? '认错了' : '分不出');
-  $('reveal').innerHTML = '<div class="reveal"><b>' + verdict + '</b>：真实生日是 <b>' + real + ' 版</b>，你选的是' + (choice === '?' ? '「分不出」' : ' ' + choice + ' 版') + '。<br>' +
-    '另一份用的随机生日：' + esc(fakeTxt) + '<br>' +
-    '累计 ' + log.length + ' 轮：认出 ' + n('hit') + '，认错 ' + n('miss') + '，分不出 ' + n('unsure') + '<br>' +
-    '<button type="button" class="link" id="clearLog">清空盲测记录</button></div>' +
-    '<details><summary>调试信息</summary><pre>' + esc(JSON.stringify({ A: blindState.A.debug, B: blindState.B.debug }, null, 2)) + '</pre></details>';
-  ['pickA', 'pickB', 'pickU'].forEach((id) => { $(id).disabled = true; });
-  $('clearLog').onclick = () => { localStorage.removeItem(LOG_KEY); $('clearLog').textContent = '已清空'; $('clearLog').disabled = true; };
-}
+  $('go').disabled = true; $('out').replaceChildren();
+  say('生成中，约需 30–60 秒，请不要关闭页面。');
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 150000);
+  try {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': $('key').value }, body: JSON.stringify(payload), signal: ctl.signal });
+    const raw = await res.text();
+    let data; try { data = JSON.parse(raw); } catch (_) { throw new Error('返回内容不完整，请重新点击“生成漫画”。'); }
+    if (res.status === 401) throw new Error('管理员密钥不正确。');
+    if (!data.ok) throw new Error('生成失败：' + (data.error || res.status) + (data.detail ? '（' + data.detail + '）' : ''));
+    say(''); render(data);
+  } catch (e) {
+    say(e.name === 'AbortError' ? '等待超过 150 秒，请重试。' : e.message, true);
+  } finally { clearTimeout(timer); $('go').disabled = false; }
+});
 </script>
 </body>
 </html>
