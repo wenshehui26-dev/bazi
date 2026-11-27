@@ -257,7 +257,7 @@ function doLogin(){
 
 async function loadStats(){
   try{
-    const r = await fetch(`${API}/admin/stats?key=${encodeURIComponent(adminKey)}`);
+    const r = await fetch(`${API}/admin/stats`, { headers: { 'X-Admin-Key': adminKey } });
     if(r.status===401){
       adminKey='';
       document.getElementById('login-err').textContent='Key 不正确';
@@ -315,10 +315,12 @@ async function addCredits(){
   if(!userId){el.innerHTML='<div class="add-result fail">请输入用户 ID</div>';return;}
 
   try{
-    const r = await fetch(
-      `${API}/admin/add-credits?key=${encodeURIComponent(adminKey)}&userId=${encodeURIComponent(userId)}&product=${product}&credits=${credits}`
-    );
-    const d = await r.json();
+        const r = await fetch(`${API}/admin/add-credits`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body: JSON.stringify({ userId, product, credits })
+    });
+        const d = await r.json();
     if(d.ok){
       el.innerHTML=`<div class="add-result ok">✓ 已为 ${userId} 添加 ${credits} 积分，当前余额：${d[product==='bazi'?'bazi_credits':'shouxiang_credits']}</div>`;
       document.getElementById('f-userid').value='';
