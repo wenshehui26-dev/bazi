@@ -34,7 +34,9 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--hi);outline-off
 h2{font-size:24px;margin:10px 0 2px}.tag{margin:0 0 14px;color:#5b6675}
 .grid{display:grid;grid-template-columns:1fr;gap:14px}
 .panel{background:#fff;border:3px solid var(--ink)}
-.art{height:150px;display:flex;align-items:center;justify-content:center;font-size:58px;position:relative;border-bottom:3px solid var(--ink)}
+.art{aspect-ratio:3/4;position:relative;overflow:hidden;border-bottom:3px solid var(--ink)}
+.art img{width:100%;height:100%;object-fit:cover;display:block}
+.art .em{display:grid;place-items:center;height:100%;font-size:64px}
 .art .cap{position:absolute;left:0;right:0;bottom:0;padding:5px 10px;background:rgba(28,36,48,.78);color:#fff;font-size:12px;line-height:1.4}
 .age{position:absolute;top:8px;left:8px;background:var(--hi);font-weight:700;font-size:13px;padding:2px 8px;border:2px solid var(--ink)}
 .body{padding:12px 14px;display:grid;gap:10px}
@@ -47,7 +49,7 @@ h2{font-size:24px;margin:10px 0 2px}.tag{margin:0 0 14px;color:#5b6675}
 </head>
 <body>
 <div id="app">
-  <header><div class="av">🖋️</div><div><b>漫画师</b><small>原型 · 画面为占位图</small></div></header>
+  <header><div class="av">🖋️</div><div><b>漫画师</b><small>原型 · 画面为示意图</small></div></header>
   <div id="chat"></div>
   <div id="out"></div>
 </div>
@@ -107,8 +109,11 @@ function render(data) {
   const grid = el('div', 'grid');
   for (const p of c.panels) {
     const card = el('article', 'panel');
-    const art = el('div', 'art', SCENE[p.scene_key] || '🎞️'); art.style.background = MOOD[p.mood] || '#dde3ea';
-    art.append(el('span', 'age', (p.age != null ? p.age + ' 岁' : '') + (p.stage ? ' ' + p.stage : '')), el('div', 'cap', p.scene));
+    const art = el('div', 'art'); art.style.background = MOOD[p.mood] || '#dde3ea';
+    const key = SCENE[p.scene_key] ? p.scene_key : 'city_street';
+    const im = new Image(); im.alt = p.scene || ''; im.loading = 'lazy'; im.src = 'scenes/' + key + '.jpg';
+    im.onerror = () => im.replaceWith(el('div', 'em', SCENE[key]));
+    art.append(im, el('span', 'age', (p.age != null ? p.age + ' 岁' : '') + (p.stage ? ' ' + p.stage : '')), el('div', 'cap', p.scene));
     const body = el('div', 'body'); body.append(el('p', 'nar', p.narration));
     for (const d of p.dialogue || []) { const b = el('p', 'bub'); b.append(el('b', '', d.who || ''), document.createTextNode(d.text)); body.append(b); }
     card.append(art, body); grid.append(card);
